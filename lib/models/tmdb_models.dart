@@ -157,7 +157,17 @@ class MovieDetail{
   }
 
   String posterUrl(PosterSize size){
-    return TmdbUtil.posterUrl(this.posterPath, size);
+    if (this.posterPath != null){
+      return TmdbUtil.posterUrl(this.posterPath, size);
+    }
+    return "";
+  }
+
+  String releasedAt(){
+    if (this.releaseDate != null){
+      return TmdbUtil.date2string(this.releaseDate);
+    }
+    return "";
   }
 }
 
@@ -184,7 +194,10 @@ class Cast{
   }
 
   String profileUrl(PosterSize size){
-    return TmdbUtil.profileUrl(this.profilePath, size);
+    if (this.profilePath != null){
+      return TmdbUtil.profileUrl(this.profilePath, size);
+    }
+    return "";
   }
 
 }

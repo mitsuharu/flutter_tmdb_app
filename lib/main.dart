@@ -4,6 +4,10 @@ import 'models/tmdb_models.dart';
 import 'models/tmdb_responses.dart';
 import 'constants.dart';
 
+import 'dart:async';
+
+import 'widgets/movie_card.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -116,7 +120,7 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
       itemCount += 1;
     }
 
-    return ListView.builder(
+    var listView = ListView.builder(
       controller: _scrollController,
       itemBuilder: (BuildContext context, int index) {
 
@@ -124,23 +128,53 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
         if (index < this.movies.length){
           MovieDetail movie = movies[index];
           title = movie.title;
-        }
 
-        return Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.black38),
+          return Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.black38),
+                ),
               ),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.android),
-              title: Text(title),
-//              subtitle: Text(date),
-              onTap: () => {},
-            ));
+              child: MovieCard(
+                movie: movie,
+                onTapCell: (){
+                  print("[main][onTapCell]");
+                },
+                onTapIcon: (){
+                  print("[main][onTapIcon]");
+                },));
+        }else{
+          return Container(
+              height: 80,
+              padding: EdgeInsets.all(8),
+              child: Card(
+                child: Center(
+                  child: Text(title),
+                )
+              ));
+        }
       },
       itemCount: itemCount,
     );
+
+    return RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: listView);
+  }
+
+
+  Future<void> _onRefresh(){
+    print("pull to refresh");
+
+    // https://sbfl.net/blog/2015/01/05/writing-asynchronous-operation-with-future-in-dart/
+
+    // https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/material/overscroll_demo.dart
+
+
+    final Completer<void> completer = Completer<void>();
+    Timer(const Duration(seconds: 3), () { completer.complete(); });
+    return completer.future.then<void>((_) {});
+
   }
 
   // スクロールを検知したときに呼ばれる
@@ -151,12 +185,7 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
     const threshold = 0.8;
     if (positionRate > threshold
         && ap.isRequesting == false && this.hasNextPage == true) {
-
-
       this.page += 1;
-
-      print("now requesting for page: ${this.page}");
-
       ap.requestMovies(this.page).then((response){
         if (response != null && response is MoviesResponse){
           this.hasNextPage = response.page.hasNext();
@@ -167,19 +196,7 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
           }
         }
       });
-
-
-
-//      setState(() {
-//        _isShow = true;
-//      });
     }
-    if (positionRate < threshold - 0.05) {
-//      setState(() {
-//        _isShow = false;
-//      });
-    }
-
   }
 
 
