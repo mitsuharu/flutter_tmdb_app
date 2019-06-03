@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
 import '../models/api.dart';
 import '../models/tmdb_models.dart';
@@ -138,6 +139,18 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
   /// カレンダーに登録する
   void _registerToCalendar(MovieDetail movie){
     print("register movie info to calendar");
+
+    movie.addToCalendar().then((result){
+      var str = "成功";
+      if (result == false){
+        str = "しっっぱい";
+      }
+      Fluttertoast.showToast(
+          msg: str,
+          toastLength: Toast.LENGTH_LONG,
+          timeInSecForIos: 2);
+    });
+
 
   }
 

@@ -20,18 +20,18 @@ class MovieDetailPage extends StatefulWidget {
 
 class _MovieDetailState extends State<MovieDetailPage> {
 
-  MovieDetailResponse movieDetail = MovieDetailResponse();
-  ApiManager ap = ApiManager();
+  MovieDetailResponse movieDetail;
+  ApiManager ap;
 
   @override
   void initState() {
     super.initState();
 
+    ap = ApiManager();
     ap.requestMovieDetail(widget.movie.movieId).then((res){
       if(res != null && res is MovieDetailResponse){
-        this.movieDetail = res;
         setState(() {
-
+          this.movieDetail = res;
         });
       }
     });
@@ -51,32 +51,26 @@ class _MovieDetailState extends State<MovieDetailPage> {
         title: Text(widget.movie.title),
       ),
       body: Center(
-        child: Text("「${widget.movie.title}」の詳細です"),
+        child: bodyWidget()
       ),
     );
   }
 
 
-//  Widget movieListWidget(){
-//
-//    /*
-//    Flutterでスクロールを検知し、ある位置までスクロールしたらWidgetを表示するには · Androg
-//https://kwmt27.net/2018/09/03/flutter-scroll/
-//
-//    */
-//
-//    var length = movies.length;
-//    if (length == 0){
-//      return Center(
-//        child: Text(Constant.commons.notFound),
-//      );
-//    }
-//
-//    int itemCount = length;
-//    if (this.hasNextPage){
-//      itemCount += 1;
-//    }
-//
+  Widget bodyWidget(){
+
+    if (movieDetail == null){
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    // とりあえず
+    return Center(
+        child: Text("「${widget.movie.title}」の詳細です"),
+    );
+
+
 //    var listView = ListView.builder(
 //      controller: _scrollController,
 //      itemBuilder: (BuildContext context, int index) {
@@ -117,7 +111,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
 //    return RefreshIndicator(
 //        onRefresh: _onRefresh,
 //        child: listView);
-//  }
+  }
 
 
 }

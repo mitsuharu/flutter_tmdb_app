@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import '../util/calendar.dart';
 
 enum PosterSize{
   normal, large
@@ -169,6 +170,14 @@ class MovieDetail{
     }
     return "";
   }
+
+  Future<bool> addToCalendar() async{
+    print("[addToCalendar]");
+
+    return await UtilCalendar.addToCalendar(this.title, this.releaseDate);
+
+  }
+
 }
 
 
