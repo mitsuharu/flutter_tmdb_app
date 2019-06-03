@@ -111,7 +111,7 @@ class Tmdb{
 
   static String releaseDateLte(){
     final now = DateTime.now();
-    final date = new DateTime(now.year, now.month + 6, now.day);
+    final date = new DateTime(now.year, now.month + 3, now.day);
     return TmdbUtil.date2string(date);
   }
 
