@@ -1,12 +1,10 @@
 import 'package:intl/intl.dart';
 
+enum PosterSize{
+  normal, large
+}
 
-/*
-  TODO: 画像URLをサイズ別に動的に取得できるようにする．
-
-* */
-
-class Util{
+class TmdbUtil{
 
   //     // "release_date": "2019-04-24",
 
@@ -16,15 +14,38 @@ class Util{
   }
 
   static String date2string(DateTime date){
-    var format = Util._dateFormat();
+    var format = TmdbUtil._dateFormat();
     var str = format.format(date);
     return str;
   }
 
   static DateTime string2date(String str){
-    var format = Util._dateFormat();
+    var format = TmdbUtil._dateFormat();
     return format.parse(str);
   }
+
+  static String posterUrl(String path, PosterSize size){
+    const String baseUrl = "http://image.tmdb.org/t/p/";
+    String tempSize = "w185";
+    if (size != null){
+      if (size == PosterSize.large){
+        tempSize = "w342";
+      }
+    }
+    return baseUrl + tempSize + path;
+  }
+
+  static String profileUrl(String path, PosterSize size){
+    const String baseUrl = "http://image.tmdb.org/t/p/";
+    String tempSize = "w185";
+//    if (size != null){
+//      if (size == PosterSize.large){
+//        tempSize = "w342";
+//      }
+//    }
+    return baseUrl + tempSize + path;
+  }
+
 
 }
 
@@ -32,10 +53,12 @@ class Tmdb{
 
   static String _baseUrl = "api.themoviedb.org";
   static String _pathMovie = "3/movie/";
+  static String _pathDiscover = "3/discover/movie/";
 
   static var _params = {
     "api_key": "6248dc054117576021d2a134b30dc48e",
-    "language": 'ja',
+    "language": "ja",
+    "region": "jp",
   };
 
   /// 動画詳細用のURI
@@ -50,6 +73,49 @@ class Tmdb{
     return uri;
   }
 
+  /// 動画キャスト用のURI
+  static uriMovieCasts(int movieId){
+    if(movieId == null){
+      return null;
+    }
+    var uri = Uri.https(
+        Tmdb._baseUrl,
+        "${Tmdb._pathMovie}$movieId/credits",
+        Tmdb._params);
+    return uri;
+  }
+
+  /// 動画検索用のURI
+  static uriDiscoverMovies(int page){
+
+    var params = Tmdb._params;
+    params["sort_by"] = "release_date.desc";
+    params["include_adult"] = "false";
+    params["include_video"] = "false";
+    params["page"] = "$page";
+    params["primary_release_date.gte"] = Tmdb.releaseDateGte();
+    params["primary_release_date.lte"] = Tmdb.releaseDateLte();
+
+    var uri = Uri.https(
+        Tmdb._baseUrl,
+        "${Tmdb._pathDiscover}",
+        params);
+    return uri;
+  }
+
+  static String releaseDateGte(){
+    final now = DateTime.now();
+    final date = new DateTime(now.year, now.month - 3, now.day);
+    return TmdbUtil.date2string(date);
+  }
+
+  static String releaseDateLte(){
+    final now = DateTime.now();
+    final date = new DateTime(now.year, now.month + 6, now.day);
+    return TmdbUtil.date2string(date);
+  }
+
+
 }
 
 
@@ -62,6 +128,7 @@ class MovieDetail{
   String homepage;
   String posterPath;
   String status;
+  int runtime;
 
   Collection collection;
 
@@ -69,7 +136,7 @@ class MovieDetail{
 
   DateTime releaseDate;
 
-  MovieDetail(var json) {
+  MovieDetail(Map<String, dynamic> json) {
     if(json == null){
       return;
     }
@@ -80,27 +147,54 @@ class MovieDetail{
     this.overview = json["overview"];
     this.homepage = json["homepage"];
     this.status = json["status"];
+    this.runtime = json["runtime"];
 
     this.collection = Collection(json["belongs_to_collection"]);
-    
     this.genres = Genre.genresFormJsonList(json["genres"]);
-    
-    // サムネイル
-    this.posterPath = "http://image.tmdb.org/t/p/w185" + json["poster_path"];
+    this.posterPath = json["poster_path"];
+    this.releaseDate = TmdbUtil.string2date(json["release_date"]);
 
-    // "release_date": "2019-04-24",
-    this.releaseDate = Util.string2date(json["release_date"]);
+  }
 
+  String posterUrl(PosterSize size){
+    return TmdbUtil.posterUrl(this.posterPath, size);
   }
 }
 
+
+/// キャスト
+class Cast{
+  int castId;
+  int peopleId;
+  String character;
+  String name;
+  String profilePath;
+
+  Cast(Map<String, dynamic> json) {
+    if (json == null) {
+      return;
+    }
+
+    this.castId = json["cast_id"];
+    this.peopleId = json["id"];
+    this.character = json["character"];
+    this.name = json["name"];
+    this.profilePath = json["profile_path"];
+
+  }
+
+  String profileUrl(PosterSize size){
+    return TmdbUtil.profileUrl(this.profilePath, size);
+  }
+
+}
 
 /// ジャンル
 class Genre{
   int genreId;
   String name;
 
-  Genre(var json) {
+  Genre(Map<String, dynamic> json) {
     if(json == null){
       return;
     }
@@ -132,10 +226,7 @@ class Collection{
   String posterPath;
   String backdropPath;
 
-  Collection(var json) {
-
-    print("collection $json");
-
+  Collection(Map<String, dynamic> json) {
     if(json == null){
       return;
     }
