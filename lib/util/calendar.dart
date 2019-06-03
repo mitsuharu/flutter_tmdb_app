@@ -83,7 +83,7 @@ class UtilCalendar{
 
 
   Future<bool> addEvents(String title, DateTime date) async {
-    
+
     try {
       for (var cal in calendars){
         if (cal.isReadOnly){
