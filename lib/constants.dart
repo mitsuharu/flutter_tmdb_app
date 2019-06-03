@@ -1,23 +1,20 @@
 // 定数群をまとめたクラス
 class Constant{
 
-  // アプリのタイトル
-  static const String appTitle = "Todo App";
-  static const String addTodoViewTitle = "Todoを追加する";
-
-  static var detail = Detail();
   static var alert = Alert();
   static var app = App();
+
+  static var commons = Commons();
+
 }
 
+class Commons{
+  final String notFound = "見つかりません";
+  final String nowLoading = "読み込み中";
+}
 
 class App{
   final String startTodoApp = "TODOを追加しよう";
-}
-
-class Detail{
-  final String addTitle = "Todoを追加する";
-  final String editTitle = "Todoを編集する";
 }
 
 class Alert{
@@ -29,9 +26,3 @@ class Alert{
 
 }
 
-
-enum TodoDetailMode{
-  update,
-  add,
-  delete,
-}

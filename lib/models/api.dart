@@ -23,8 +23,8 @@ https://qiita.com/yasutaka_ono/items/6d2a0d3b0856598f9788
 
 
 class ApiManager{
-  static String apiKey = ApiConstants.apiKey;
 
+  bool isRequesting = false;
 
   void doSamples(){
     print("[doSamples]");
@@ -43,6 +43,8 @@ class ApiManager{
 
   /// 最近の動画一覧を取得する
   Future<MoviesResponse> requestMovies(int page) async{
+    this.isRequesting = true;
+
     var uri = Tmdb.uriDiscoverMovies(page);
     http.Response response = await http.get(uri);
     var jsonData = json.decode(response.body);
@@ -55,12 +57,14 @@ class ApiManager{
       res.movies.add(MovieDetail(j));
     }
 
+    this.isRequesting = false;
     return res;
   }
 
 
   /// 動画詳細を取得する
   Future<MovieDetailResponse> requestMovieDetail(int movieId) async{
+    this.isRequesting = true;
 
     MovieDetailResponse res = MovieDetailResponse();
     res.movie = null;
@@ -79,18 +83,9 @@ class ApiManager{
       res.casts.add(Cast(j));
     }
 
+    this.isRequesting = false;
     return res;
   }
 
-//  Future<CastsResponse> requestCasts(int movieId) async{
-//
-//    var uri = Tmdb.uriMovieDetail(movieId);
-//    http.Response response = await http.get(uri);
-//
-//    MovieDetail md = MovieDetail(json.decode(response.body));
-//    print("[ApiManager][requestMovieDetail] ${md.movieId}, ${md.title}, ${md.releaseDate}");
-//    print("${md.genres[0].name}, ${md.collection.backdropPath}");
-//
-//    return md;
-//  }
+
 }
