@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:toast/toast.dart';
 import '../constants.dart';
 import '../models/api.dart';
 import '../models/tmdb_models.dart';
@@ -77,7 +77,7 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
     var length = movies.length;
     if (length == 0){
       return Center(
-        child: Text(Constant.commons.notFound),
+        child: CircularProgressIndicator(), // Text(Constant.commons.notFound),
       );
     }
 
@@ -141,14 +141,11 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
     print("register movie info to calendar");
 
     movie.addToCalendar().then((result){
-      var str = "成功";
+      var str = Constant.cal.successMessage;
       if (result == false){
-        str = "しっっぱい";
+        str = Constant.cal.errorMessage;
       }
-      Fluttertoast.showToast(
-          msg: str,
-          toastLength: Toast.LENGTH_LONG,
-          timeInSecForIos: 2);
+      Toast.show(str, context);
     });
 
 

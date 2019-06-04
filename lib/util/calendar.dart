@@ -13,6 +13,7 @@ https://pub.dev/packages/device_calendar#-readme-tab-
 
  */
 
+
 class UtilCalendar{
 
   DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
@@ -21,14 +22,11 @@ class UtilCalendar{
   UtilCalendar(): super();
 
   static Future<bool> addToCalendar(String title, DateTime date) async {
-
     UtilCalendar cal = UtilCalendar();
-
     bool auth = await cal.retrieveCalendars();
     if (auth == false){
       return false;
     }
-
     bool exist = await cal.retrieveCalendarEvents(title, date);
     if (exist == false){
       bool result =  await cal.addEvents(title, date);
@@ -40,9 +38,7 @@ class UtilCalendar{
   Future<bool> retrieveCalendars() async {
     try {
       _deviceCalendarPlugin = DeviceCalendarPlugin();
-      _deviceCalendarPlugin.hasPermissions();
       var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
-
       if (permissionsGranted.isSuccess && !permissionsGranted.data) {
         permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
         if (!permissionsGranted.isSuccess || !permissionsGranted.data) {
@@ -51,7 +47,6 @@ class UtilCalendar{
       }
       final result = await _deviceCalendarPlugin.retrieveCalendars();
       calendars = result.data;
-
       return result.isSuccess;
     } on PlatformException catch (e) {
       print("retrieveCalendars e:$e");
@@ -68,7 +63,6 @@ class UtilCalendar{
       for (var cal in calendars) {
         final result = await _deviceCalendarPlugin.retrieveEvents(cal.id, params);
         for (var ev in result.data){
-          print(ev.title);
           if (ev.title == title){
             return true;
           }

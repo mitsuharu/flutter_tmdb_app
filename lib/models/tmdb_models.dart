@@ -174,6 +174,7 @@ class MovieDetail{
   Future<bool> addToCalendar() async{
     print("[addToCalendar]");
 
+
     return await UtilCalendar.addToCalendar(this.title, this.releaseDate);
 
   }

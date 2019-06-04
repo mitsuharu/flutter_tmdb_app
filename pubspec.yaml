@@ -24,10 +24,12 @@ dependencies:
   http: ^0.12.0+2
 
   # ui
-  fluttertoast: ^3.1.0
+  toast: ^0.1.4
 
   # util
   intl: ^0.15.8
+
+  # calendar
   device_calendar: ^0.1.2+2
 
   # The following adds the Cupertino Icons font to your application.
