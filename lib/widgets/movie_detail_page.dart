@@ -8,6 +8,7 @@ import '../models/api.dart';
 import '../models/tmdb_models.dart';
 import '../models/tmdb_responses.dart';
 import '../widgets/movie_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 動画詳細ページ
 class MovieDetailPage extends StatefulWidget {
@@ -54,6 +55,9 @@ class _MovieDetailState extends State<MovieDetailPage> {
       if(res != null && res is MovieDetailResponse){
         setState(() {
           this.movieDetail = res;
+          
+          print("casts.length: ${res.casts.length}");
+          
         });
       }
     });
@@ -82,6 +86,14 @@ class _MovieDetailState extends State<MovieDetailPage> {
   Scaffold scaffoldWidget(){
 
     var appBar = AppBar(
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.calendar_today),
+          onPressed: (){
+            print("press cal");
+          },
+        )
+      ],
 //      title: Text(widget.movie.title),
     );
 
@@ -113,40 +125,35 @@ class _MovieDetailState extends State<MovieDetailPage> {
     final Size size = MediaQuery.of(context).size;
     var imageUrl = movieDetail.movie.posterUrl(PosterSize.large);
 
-    var listView = ListView.builder(
-        itemBuilder: (BuildContext context, int index){
-          if (index == 0){
-            return titleCell(movieDetail.movie.title);
-          }
-          if (index == 1){
-            if (imageUrl != null){
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Container(
-                  width: size.width,
-                  child: Image.network(imageUrl, fit: BoxFit.contain),
-                )
-              );
-            }else{
-              return null;
-            }
-          }else{
-            return paddingCell(movieDetail.movie.overview);
+    List<Widget> items = <Widget>[];
+    items.add(titleCell(movieDetail.movie.title));
+    if (imageUrl != null) {
+      var temp = Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Container(
+            width: size.width,
+            child: Image.network(imageUrl, fit: BoxFit.contain),
+          )
+      );
+      items.add(temp);
+    }
+    if (movieDetail.movie.overview != null
+        && movieDetail.movie.overview.length > 0){
+      items.add(paddingCell(movieDetail.movie.overview));
+    }
+    if (movieDetail.movie.homepage != null
+        && movieDetail.movie.homepage.length > 0){
+      items.add(homepageCell());
+    }
+    if (movieDetail.casts != null){
+      for (var cast in movieDetail.casts){
+        items.add(castCell(cast));
+      }
+    }
 
-//            return Container(
-//                color: index.isOdd ? Colors.blue : Colors.white,
-//
-//                child: Center(
-//                  child: Text(
-//                    "祇園精舎の鐘の声、諸行無常の響きあり。沙羅双樹の花の色、盛者必衰の理をあらはす。おごれる人も久しからず。ただ春の夜の夢のごとし。たけき者も遂にはほろびぬ、ひとへに風の前の塵に同じ。 ",
-//                    style: TextStyle(fontSize: 32),),
-//                )
-//            );
-          }
-        },
-        itemCount: 10,
+    var listView = ListView(
+      children: items,
     );
-
 
     return Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -154,6 +161,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
     );
 
   }
+
 
   Widget titleCell(string){
     return Padding(
@@ -168,13 +176,14 @@ class _MovieDetailState extends State<MovieDetailPage> {
   }
 
 
-  Widget paddingCell(string){
+  Widget paddingCell(String string){
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Colors.black38),
+         //   bottom: BorderSide(color: Colors.black38),
           ),
         ),
         child: ListTile(
@@ -182,6 +191,81 @@ class _MovieDetailState extends State<MovieDetailPage> {
         ),
       ),
     );
+  }
+
+  Widget homepageCell(){
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            //   bottom: BorderSide(color: Colors.black38),
+          ),
+        ),
+        child: Center(
+          child: IconButton(
+              icon: Icon(Icons.home),
+              onPressed: (){
+                var url = movieDetail.movie.homepage;
+                print("url $url");
+                if (url != null){
+                  canLaunch(url).then((canOpen){
+                    print("canOpen $canOpen");
+                    if (canOpen == true){
+                      launch(url);
+                    }
+                  });
+                }
+              }),
+        ),
+      ),
+    );
+  }
+
+  Widget castCell(Cast cast){
+
+    var cell = Padding(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+          //     bottom: BorderSide(color: Colors.black38),
+          ),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              height: 100,
+              width: 80,
+              child: FadeInImage.assetNetwork(
+                fit: BoxFit.contain,
+                placeholder: 'lib/images/no_poster_image.png',
+                image: cast.profileUrl(PosterSize.normal),
+              ),
+            ),
+            Container(
+              width: 10,
+            ),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(cast.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(cast.character),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+
+    return InkWell(
+        onTap: () {
+          print("tap actor cell");
+        },
+        child: cell);
+
   }
 
 

@@ -75,9 +75,6 @@ class ApiManager{
     http.Response movieResponse = await http.get(movieUri);
     res.movie = MovieDetail(json.decode(movieResponse.body));
 
-    print(movieUri);
-
-
     // cast
     var castUri = Tmdb.uriMovieCasts(movieId);
     http.Response castResponse = await http.get(castUri);
