@@ -2,26 +2,26 @@ PODS:
   - device_calendar (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - fluttertoast (0.0.2):
+  - image_downloader (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - device_calendar (from `.symlinks/plugins/device_calendar/ios`)
   - Flutter (from `.symlinks/flutter/ios`)
-  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - image_downloader (from `.symlinks/plugins/image_downloader/ios`)
 
 EXTERNAL SOURCES:
   device_calendar:
     :path: ".symlinks/plugins/device_calendar/ios"
   Flutter:
     :path: ".symlinks/flutter/ios"
-  fluttertoast:
-    :path: ".symlinks/plugins/fluttertoast/ios"
+  image_downloader:
+    :path: ".symlinks/plugins/image_downloader/ios"
 
 SPEC CHECKSUMS:
   device_calendar: 23b28a5f1ab3bf77e34542fb1167e1b8b29a98f5
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
-  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
+  image_downloader: e5e747da37f5270b2d549747fcef9d276224d7b1
 
 PODFILE CHECKSUM: ebd43b443038e611b86ede96e613bd6033c49497
 

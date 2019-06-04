@@ -145,6 +145,10 @@ class MovieDetail{
     this.movieId = json["id"];
     this.isAdult = json["adult"];
     this.title = json["title"];
+    if (json["original_language"] == "ja"){
+      this.title = json["original_title"];
+    }
+
     this.overview = json["overview"];
     this.homepage = json["homepage"];
     this.status = json["status"];
