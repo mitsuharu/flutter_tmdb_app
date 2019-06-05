@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import '../util/calendar.dart';
 
 enum PosterSize{
@@ -14,8 +15,21 @@ class TmdbUtil{
     return format;
   }
 
+  static DateFormat _dateFormatJa(){
+    initializeDateFormatting("ja_JP");
+
+    var format = DateFormat("yyyy年M月d日(E)", "ja_JP");
+    return format;
+  }
+
   static String date2string(DateTime date){
     var format = TmdbUtil._dateFormat();
+    var str = format.format(date);
+    return str;
+  }
+
+  static String date2stringJa(DateTime date){
+    var format = TmdbUtil._dateFormatJa();
     var str = format.format(date);
     return str;
   }
@@ -170,17 +184,14 @@ class MovieDetail{
 
   String releasedAt(){
     if (this.releaseDate != null){
-      return TmdbUtil.date2string(this.releaseDate);
+      return TmdbUtil.date2stringJa(this.releaseDate);
     }
     return "";
   }
 
   Future<bool> addToCalendar() async{
     print("[addToCalendar]");
-
-
     return await UtilCalendar.addToCalendar(this.title, this.releaseDate);
-
   }
 
 }

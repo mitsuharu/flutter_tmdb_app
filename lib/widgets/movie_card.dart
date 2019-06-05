@@ -79,7 +79,7 @@ class _MovieCardState extends State<MovieCard> {
                 height: cartHeight,
                 child: IconButton(
                   padding: new EdgeInsets.all(0.0),
-                  icon: new Icon(Icons.calendar_today, size: 18.0), // event
+                  icon: new Icon(Icons.event, size: 18.0), // event
                   onPressed: (){
                     print("add to calendar");
                     if (this.onTapIcon != null){
