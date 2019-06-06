@@ -14,7 +14,7 @@ class Commons{
 }
 
 class App{
-  final String startTodoApp = "TODOを追加しよう";
+  final String mainTitle = "直近の公開映画";
 }
 
 class Cal{

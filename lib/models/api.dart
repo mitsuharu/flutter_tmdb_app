@@ -26,21 +26,6 @@ class ApiManager{
 
   bool isRequesting = false;
 
-  void doSamples(){
-    print("[doSamples]");
-
-//    var aaa = Tmdb.uriDiscoverMovies(1);
-//    print(aaa);
-
-//     requestMovieDetail(299534);
-
-//    this.requestMovies(1).then((response){
-//      var page = response.page;
-//      print("response $page");
-//    });
-
-  }
-
   /// 最近の動画一覧を取得する
   Future<MoviesResponse> requestMovies(int page) async{
     this.isRequesting = true;
@@ -86,6 +71,36 @@ class ApiManager{
     this.isRequesting = false;
     return res;
   }
+
+  /// キャストから映画一覧を取得する
+  Future<MoviesResponse> requestMoviesWithCast(int personId, int page) async{
+    this.isRequesting = true;
+
+    var uri = Tmdb.uriDiscoverMoviesWithCast(personId, page);
+    http.Response response = await http.get(uri);
+    var jsonData = json.decode(response.body);
+
+    var res = MoviesResponse();
+    res.page = Page(jsonData);
+    res.movies = <MovieDetail>[];
+
+    for (var j in jsonData["results"]){
+      res.movies.add(MovieDetail(j));
+    }
+
+    this.isRequesting = false;
+    return res;
+  }
+
+  Future<MoviesResponse> requestMoviesForMainPage(int personId, int page) async{
+
+    if (personId == null){
+      return requestMovies(page);
+    }else{
+      return requestMoviesWithCast(personId, page);
+    }
+  }
+
 
 
 }

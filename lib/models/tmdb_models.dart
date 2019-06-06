@@ -70,7 +70,7 @@ class Tmdb{
   static String _pathMovie = "3/movie/";
   static String _pathDiscover = "3/discover/movie/";
 
-  static var _params = {
+  static Map<String, String> _params = {
     "api_key": "6248dc054117576021d2a134b30dc48e",
     "language": "ja",
     "region": "jp",
@@ -103,13 +103,13 @@ class Tmdb{
   /// 動画検索用のURI
   static uriDiscoverMovies(int page){
 
-    var params = Tmdb._params;
+    var params = Map<String, String>.from(Tmdb._params);
     params["sort_by"] = "release_date.desc";
     params["include_adult"] = "false";
     params["include_video"] = "false";
     params["page"] = "$page";
-    params["primary_release_date.gte"] = Tmdb.releaseDateGte();
-    params["primary_release_date.lte"] = Tmdb.releaseDateLte();
+    params["primary_release_date.gte"] = Tmdb.releaseDateGte(3);
+    params["primary_release_date.lte"] = Tmdb.releaseDateLte(3);
 
     var uri = Uri.https(
         Tmdb._baseUrl,
@@ -118,15 +118,33 @@ class Tmdb{
     return uri;
   }
 
-  static String releaseDateGte(){
+  static uriDiscoverMoviesWithCast(int personId, int page){
+
+    var params = Map<String, String>.from(Tmdb._params);
+    params["sort_by"] = "release_date.desc";
+    params["include_adult"] = "false";
+    params["include_video"] = "false";
+    params["with_cast"] = "$personId";
+    params["page"] = "$page";
+    params["primary_release_date.gte"] = Tmdb.releaseDateGte(12);
+    params["primary_release_date.lte"] = Tmdb.releaseDateLte(6);
+
+    var uri = Uri.https(
+        Tmdb._baseUrl,
+        "${Tmdb._pathDiscover}",
+        params);
+    return uri;
+  }
+
+  static String releaseDateGte(int month){
     final now = DateTime.now();
-    final date = new DateTime(now.year, now.month - 3, now.day);
+    final date = new DateTime(now.year, now.month - month, now.day);
     return TmdbUtil.date2string(date);
   }
 
-  static String releaseDateLte(){
+  static String releaseDateLte(int month){
     final now = DateTime.now();
-    final date = new DateTime(now.year, now.month + 3, now.day);
+    final date = new DateTime(now.year, now.month + month, now.day);
     return TmdbUtil.date2string(date);
   }
 
@@ -200,7 +218,7 @@ class MovieDetail{
 /// キャスト
 class Cast{
   int castId;
-  int peopleId;
+  int personId;
   String character;
   String name;
   String profilePath;
@@ -211,7 +229,7 @@ class Cast{
     }
 
     this.castId = json["cast_id"];
-    this.peopleId = json["id"];
+    this.personId = json["id"];
     this.character = json["character"];
     this.name = json["name"];
     this.profilePath = json["profile_path"];

@@ -9,6 +9,10 @@ import '../models/tmdb_models.dart';
 import '../models/tmdb_responses.dart';
 import '../widgets/movie_card.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:toast/toast.dart';
+import '../widgets/movie_list_page.dart';
+import 'package:share/share.dart';
+
 
 /// 動画詳細ページ
 class MovieDetailPage extends StatefulWidget {
@@ -27,37 +31,15 @@ class _MovieDetailState extends State<MovieDetailPage> {
   MovieDetailResponse movieDetail;
   ApiManager ap;
 
-  List<Widget> _items = <Widget>[];
-
-  double imageAspect;
-
   @override
   void initState() {
     super.initState();
-
-    imageAspect = 1.0;
-
-    for (var i = 0; i < 10; i++){
-      var item = Container(
-        color: i.isOdd ? Colors.blue : Colors.white,
-        height: 100,
-        child: Center(
-          child: Text(
-            "No $i",
-            style: TextStyle(fontSize: 32),),
-        )
-      );
-      _items.add(item);
-    }
 
     ap = ApiManager();
     ap.requestMovieDetail(widget.movie.movieId).then((res){
       if(res != null && res is MovieDetailResponse){
         setState(() {
           this.movieDetail = res;
-          
-          print("casts.length: ${res.casts.length}");
-          
         });
       }
     });
@@ -73,74 +55,106 @@ class _MovieDetailState extends State<MovieDetailPage> {
   Widget build(BuildContext context) {
 
     return scaffoldWidget();
-//    return Scaffold(
-//      appBar: AppBar(
-//        title: Text(widget.movie.title),
-//      ),
-//      body: Center(
-//        child: bodyWidget()
-//      ),
+//    return SafeArea(
+//      child: scaffoldWidget(),
 //    );
+
   }
 
   Scaffold scaffoldWidget(){
 
-    var appBar = AppBar();
-    if (movieDetail != null){
-      appBar = AppBar(
-        actions: <Widget>[
-//          IconButton(
-//            icon: Icon(Icons.favorite_border),
-//            onPressed: (){
-//              print("press cal");
-//            },
-//          ),
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: (){
-              print("press cal");
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.event),
-            onPressed: (){
-              print("press cal");
-            },
-          )
-        ],
-      );
-    }
-
     if (movieDetail == null){
       return Scaffold(
-        appBar: appBar,
+        appBar: AppBar(),
         body: Center(
             child: CircularProgressIndicator(),
         ),
       );
     }else{
       return Scaffold(
-        appBar: appBar,
         body: bodyWidget(),
+        floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.event),
+            onPressed: (){
+              _addToCalendar();
+            }),
       );
     }
 
   }
 
 
+  void _addToCalendar(){
+    movieDetail.movie.addToCalendar().then((result){
+      var str = Constant.cal.successMessage;
+      if (result == false){
+        str = Constant.cal.errorMessage;
+      }
+      Toast.show(str, context);
+    });
+  }
+
+  void _shareMovie(){
+
+    var text = movieDetail.movie.title;
+    if (movieDetail.movie.homepage != null && movieDetail.movie.homepage.length > 0){
+      text += " ${movieDetail.movie.homepage}";
+    }
+
+    Share.share(text);
+
+  }
+
+
   Widget bodyWidget(){
 
-//    if (movieDetail == null){
-//      return Center(
-//        child: CircularProgressIndicator(),
-//      );
-//    }
+    return contentSliverListView();
+//    return Padding(
+//        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+//        child: contentsListView()
+//    );
+
+  }
+
+  Widget contentSliverListView(){
+
+    return CustomScrollView(slivers: <Widget>[
+      
+      SliverAppBar(
+        forceElevated: true,
+        pinned: false,
+        expandedHeight: 44,
+        flexibleSpace: FlexibleSpaceBar(
+          title: null,
+          background: null,
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: (){
+              _shareMovie();
+            },
+          )
+        ],
+      ),
+      SliverPadding(
+        padding: EdgeInsets.all(16.0),
+        sliver: SliverList(
+            delegate: SliverChildListDelegate(contentsItems())),
+      ),
+
+    ]);
+
+  }
+
+  List<Widget> contentsItems(){
 
     final Size size = MediaQuery.of(context).size;
     var imageUrl = movieDetail.movie.posterUrl(PosterSize.large);
 
     List<Widget> items = <Widget>[];
     items.add(titleCell(movieDetail.movie.title));
+
     if (imageUrl != null) {
       var temp = Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -168,15 +182,15 @@ class _MovieDetailState extends State<MovieDetailPage> {
       }
     }
 
+    return items;
+  }
+
+  Widget contentsListView(){
+
     var listView = ListView(
-      children: items,
+      children: contentsItems(),
     );
-
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        child: listView
-    );
-
+    return listView;
   }
 
 
@@ -299,6 +313,13 @@ class _MovieDetailState extends State<MovieDetailPage> {
     return InkWell(
         onTap: () {
           print("tap actor cell");
+
+          var page = MovieListPage(cast: cast);
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => page),
+          ).then((_){
+            page = null;
+          });
         },
         child: cell);
 

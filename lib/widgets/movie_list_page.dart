@@ -10,16 +10,19 @@ import '../widgets/movie_detail_page.dart';
 
 /// 前後数か月公開の映画の一覧です
 class MovieListPage extends StatefulWidget {
-  MovieListPage({Key key, this.title}) : super(key: key);
+  MovieListPage({Key key, this.cast}) : super(key: key);
 
-  final String title;
+  final Cast cast;
 
   @override
-  _MovieListState createState() => _MovieListState();
+  _MovieListState createState() => _MovieListState(cast: this.cast);
 }
 
 class _MovieListState extends State<MovieListPage> {
 
+  Cast cast;
+
+  String title;
   ApiManager ap = ApiManager();
   int page = 1;
   bool hasNextPage = false;
@@ -28,28 +31,56 @@ class _MovieListState extends State<MovieListPage> {
   // スクロール検知
   ScrollController _scrollController;
 
+  /// コンストラクタ
+  _MovieListState({this.cast});
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
 
-    ap.requestMovies(this.page).then((response){
-      if (response != null && response is MoviesResponse){
-        this.hasNextPage = response.page.hasNext();
-        if(response.movies.length > 0){
-          setState(() {
-            this.movies.addAll(response.movies);
-          });
-        }
-      }
-    });
+    if (this.cast == null){
+      title = Constant.app.mainTitle;
+    }else{
+      title = "${this.cast.name}";
+    }
+
+    requestAPIs(this.page);
+
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+
+  Future<int> requestAPIs(int page) async{
+
+    int personId;
+    if (this.cast != null){
+      personId = this.cast.personId;
+    }else{
+      personId = null;
+    }
+
+    print("[requestAPIs] personId: $personId, page: $page");
+
+    MoviesResponse res = await ap.requestMoviesForMainPage(personId, page);
+    if (res != null){
+      this.hasNextPage = res.page.hasNext();
+
+      print("[requestAPIs] len: ${res.movies.length}");
+
+      if(res.movies.length > 0){
+        setState(() {
+          this.movies.addAll(res.movies);
+        });
+      }
+    }
+    return page;
   }
 
   @override
@@ -59,7 +90,7 @@ class _MovieListState extends State<MovieListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: movieListWidget(),
     );
@@ -152,18 +183,23 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
   }
 
 
-  Future<void> _onRefresh(){
-    print("pull to refresh");
+  Future<void> _onRefresh() async{
 
-    // https://sbfl.net/blog/2015/01/05/writing-asynchronous-operation-with-future-in-dart/
-
-    // https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/material/overscroll_demo.dart
-
+    print("[_onRefresh]");
 
     final Completer<void> completer = Completer<void>();
-    Timer(const Duration(seconds: 3), () { completer.complete(); });
-    return completer.future.then<void>((_) {});
 
+    this.page = 1;
+    setState(() {
+      this.movies = <MovieDetail>[];
+    });
+
+    await requestAPIs(this.page).then((value){
+      print("[_onRefresh] comple");
+    });
+    completer.complete();
+
+    return completer.future.then<void>((_) {});
   }
 
   // スクロールを検知したときに呼ばれる
@@ -175,16 +211,7 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
     if (positionRate > threshold
         && ap.isRequesting == false && this.hasNextPage == true) {
       this.page += 1;
-      ap.requestMovies(this.page).then((response){
-        if (response != null && response is MoviesResponse){
-          this.hasNextPage = response.page.hasNext();
-          if(response.movies.length > 0){
-            setState(() {
-              this.movies.addAll(response.movies);
-            });
-          }
-        }
-      });
+      requestAPIs(this.page);
     }
   }
 

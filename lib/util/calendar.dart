@@ -19,6 +19,8 @@ class UtilCalendar{
   DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
   List<Calendar> calendars;
 
+  Calendar defaultCalendar;
+
   UtilCalendar(): super();
 
   static Future<bool> addToCalendar(String title, DateTime date) async {
@@ -47,6 +49,35 @@ class UtilCalendar{
       }
       final result = await _deviceCalendarPlugin.retrieveCalendars();
       calendars = result.data;
+
+      // カレンダーを並び替える
+      calendars.sort((cal0, cal1){
+
+        int score0 = 0;
+        int score1 = 0;
+
+        // それっぽい名前を優先する
+        var temps = ["movie", "film", "cinema", "映画", "private", "予定", "schedule"];
+        for (var temp in temps){
+          if (cal0.name.toLowerCase().contains(temp) == true){
+            score0 = 1;
+          }
+          if (cal1.name.toLowerCase().contains(temp) == true){
+            score1 = 1;
+          }
+        }
+
+        // 書き込み可能を優先する
+        if (cal0.isReadOnly == false){
+          score0 += 1;
+        }
+        if (cal1.isReadOnly == false){
+          score1 += 1;
+        }
+
+        return (score1 - score0);
+      });
+
       return result.isSuccess;
     } on PlatformException catch (e) {
       print("retrieveCalendars e:$e");
