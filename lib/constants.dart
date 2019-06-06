@@ -15,7 +15,7 @@ class Commons{
 }
 
 class App{
-  final String mainTitle = "直近の公開映画";
+  final String mainTitle = "最近の公開映画";
 }
 
 class Cal{
