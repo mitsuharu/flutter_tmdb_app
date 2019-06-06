@@ -7,6 +7,7 @@ import '../models/tmdb_models.dart';
 import '../models/tmdb_responses.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/movie_detail_page.dart';
+import '../widgets/info_page.dart';
 
 /// 前後数か月公開の映画の一覧です
 class MovieListPage extends StatefulWidget {
@@ -66,14 +67,9 @@ class _MovieListState extends State<MovieListPage> {
       personId = null;
     }
 
-    print("[requestAPIs] personId: $personId, page: $page");
-
     MoviesResponse res = await ap.requestMoviesForMainPage(personId, page);
     if (res != null){
       this.hasNextPage = res.page.hasNext();
-
-      print("[requestAPIs] len: ${res.movies.length}");
-
       if(res.movies.length > 0){
         setState(() {
           this.movies.addAll(res.movies);
@@ -86,12 +82,25 @@ class _MovieListState extends State<MovieListPage> {
   @override
   Widget build(BuildContext context) {
 
-//    ap.doSamples();
+
+    List<Widget> actionItems = [];
+    if (this.cast == null){
+      actionItems.add(IconButton(
+          icon: Icon(Icons.info),
+          onPressed: (){
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => InfoPage())
+            );
+          }));
+    }
+
+    var appBar = AppBar(
+      title: Text(title),
+      actions: actionItems,
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: appBar,
       body: movieListWidget(),
     );
   }
@@ -169,8 +178,6 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
 
   /// カレンダーに登録する
   void _registerToCalendar(MovieDetail movie){
-    print("register movie info to calendar");
-
     movie.addToCalendar().then((result){
       var str = Constant.cal.successMessage;
       if (result == false){
@@ -178,14 +185,10 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
       }
       Toast.show(str, context);
     });
-
-
   }
 
 
   Future<void> _onRefresh() async{
-
-    print("[_onRefresh]");
 
     final Completer<void> completer = Completer<void>();
 
@@ -194,9 +197,7 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
       this.movies = <MovieDetail>[];
     });
 
-    await requestAPIs(this.page).then((value){
-      print("[_onRefresh] comple");
-    });
+    await requestAPIs(this.page);
     completer.complete();
 
     return completer.future.then<void>((_) {});

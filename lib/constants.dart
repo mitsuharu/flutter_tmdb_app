@@ -5,6 +5,7 @@ class Constant{
   static var app = App();
   static var cal = Cal();
   static var commons = Commons();
+  static var info = Info();
 
 }
 
@@ -28,6 +29,9 @@ class Alert{
 
   final String titleDeleteTodo = "削除の確認";
   final String messageDeleteTodo = "Todoを削除しますか？";
+}
 
+class Info{
+  final String title = "お知らせ";
 }
 

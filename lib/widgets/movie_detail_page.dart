@@ -312,8 +312,6 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
     return InkWell(
         onTap: () {
-          print("tap actor cell");
-
           var page = MovieListPage(cast: cast);
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => page),
