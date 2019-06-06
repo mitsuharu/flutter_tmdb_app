@@ -28,6 +28,8 @@ dependencies:
   # ui
   toast: ^0.1.4
 
+  flutter_markdown: ^0.2.0
+
   # util
   intl: ^0.15.8
 
@@ -63,6 +65,7 @@ flutter:
   #  - images/a_dot_ham.jpeg
   assets:
     - lib/images/no_poster_image.png
+    - lib/docments/info.md
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

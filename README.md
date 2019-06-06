@@ -18,3 +18,7 @@ A new Flutter application for TMDb API
 ## 設定画面
 
 - 設定？や謝辞，ライセンス画面を作る
+
+## その他
+
+- リクエストのキャッシュをする

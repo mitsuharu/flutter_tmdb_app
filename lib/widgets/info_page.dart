@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../constants.dart';
+
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 /// お知らせページ
 class InfoPage extends StatefulWidget {
@@ -11,10 +14,13 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
 
+  String md;
 
   @override
   void initState() {
     super.initState();
+
+    readMarkdown();
   }
 
   @override
@@ -29,10 +35,31 @@ class _InfoPageState extends State<InfoPage> {
       title: Text(Constant.info.title),
     );
 
+    Widget body = Center(
+      child: CircularProgressIndicator(),
+    );
+    if (md != null && md.length > 0){
+      body = Markdown(data: md);
+
+    }
+
     return Scaffold(
       appBar: appBar,
-      body: Text("TMDb APIを使ってますよ，など．"),
+      body: body,
     );
+  }
+
+  Future<void> readMarkdown() async{
+    final String path = "lib/docments/info.md";
+    rootBundle.loadString(path).then((data){
+      setState(() {
+        md = data;
+      });
+    });
+  }
+
+  Future<String> getFileData(String path) async {
+    return await rootBundle.loadString(path);
   }
 
 }

@@ -119,11 +119,10 @@ class _MovieDetailState extends State<MovieDetailPage> {
   Widget contentSliverListView(){
 
     return CustomScrollView(slivers: <Widget>[
-      
+
       SliverAppBar(
         forceElevated: true,
         pinned: false,
-        expandedHeight: 44,
         flexibleSpace: FlexibleSpaceBar(
           title: null,
           background: null,
