@@ -29,6 +29,8 @@ class _MovieListState extends State<MovieListPage> {
   bool hasNextPage = false;
   List<MovieDetail> movies = <MovieDetail>[];
 
+  DateTime lastRequestedAt;
+
   // スクロール検知
   ScrollController _scrollController;
 
@@ -65,6 +67,10 @@ class _MovieListState extends State<MovieListPage> {
       personId = this.cast.personId;
     }else{
       personId = null;
+    }
+
+    if (page == 1 || lastRequestedAt == null){
+      lastRequestedAt = DateTime.now();
     }
 
     MoviesResponse res = await ap.requestMoviesForMainPage(personId, page);
@@ -107,12 +113,6 @@ class _MovieListState extends State<MovieListPage> {
 
 
   Widget movieListWidget(){
-
-    /*
-    Flutterでスクロールを検知し、ある位置までスクロールしたらWidgetを表示するには · Androg
-https://kwmt27.net/2018/09/03/flutter-scroll/
-
-    */
 
     var length = movies.length;
     if (length == 0){
@@ -192,13 +192,21 @@ https://kwmt27.net/2018/09/03/flutter-scroll/
 
     final Completer<void> completer = Completer<void>();
 
-    this.page = 1;
-    setState(() {
-      this.movies = <MovieDetail>[];
-    });
+    final diff = DateTime.now().difference(lastRequestedAt).inHours;
+    print("diff $diff");
 
-    await requestAPIs(this.page);
-    completer.complete();
+
+    if (diff < 1){
+      Timer(const Duration(seconds: 2), () { completer.complete(); });
+    }else{
+      this.page = 1;
+      setState(() {
+        this.movies = <MovieDetail>[];
+      });
+
+      await requestAPIs(this.page);
+      completer.complete();
+    }
 
     return completer.future.then<void>((_) {});
   }

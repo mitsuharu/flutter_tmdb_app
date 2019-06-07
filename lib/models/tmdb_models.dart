@@ -106,10 +106,10 @@ class Tmdb{
     var params = Map<String, String>.from(Tmdb._params);
     params["sort_by"] = "release_date.desc";
     params["include_adult"] = "false";
-    params["include_video"] = "false";
+    params["include_video"] = "true";
     params["page"] = "$page";
     params["primary_release_date.gte"] = Tmdb.releaseDateGte(3);
-    params["primary_release_date.lte"] = Tmdb.releaseDateLte(3);
+    params["primary_release_date.lte"] = Tmdb.releaseDateLte(2);
 
     var uri = Uri.https(
         Tmdb._baseUrl,
@@ -123,7 +123,7 @@ class Tmdb{
     var params = Map<String, String>.from(Tmdb._params);
     params["sort_by"] = "release_date.desc";
     params["include_adult"] = "false";
-    params["include_video"] = "false";
+    params["include_video"] = "true";
     params["with_cast"] = "$personId";
     params["page"] = "$page";
     params["primary_release_date.gte"] = Tmdb.releaseDateGte(12);
@@ -205,6 +205,10 @@ class MovieDetail{
       return TmdbUtil.date2stringJa(this.releaseDate);
     }
     return "";
+  }
+
+  String tmdbUrl(){
+    return "https://www.themoviedb.org/movie/$movieId?language=ja";
   }
 
   Future<bool> addToCalendar() async{

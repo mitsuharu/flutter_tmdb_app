@@ -37,6 +37,15 @@ class _MovieCardState extends State<MovieCard> {
     const double padding = 16.0;
     const double imageHeight = cartHeight - padding;
 
+    Widget imageWidget = Image.asset('lib/images/no_poster_image.png');
+    if (imageUrl != null && imageUrl.length > 0){
+      imageWidget = FadeInImage.assetNetwork(
+        fit: BoxFit.cover,
+        placeholder: 'lib/images/no_poster_image.png',
+        image: imageUrl,
+      );
+    }
+
     return InkWell(
       onTap: () {
         if (this.onTapCell != null){
@@ -55,11 +64,7 @@ class _MovieCardState extends State<MovieCard> {
               Container(
                 height: imageHeight,
                 width: imageHeight * 2.0/3.0,
-                child: FadeInImage.assetNetwork(
-                  fit: BoxFit.cover,
-                  placeholder: 'lib/images/no_poster_image.png',
-                  image: imageUrl,
-                ),
+                child: imageWidget,
               ),
               SpaceBox.width(16),
 

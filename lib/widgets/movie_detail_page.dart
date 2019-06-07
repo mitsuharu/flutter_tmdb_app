@@ -19,7 +19,6 @@ class MovieDetailPage extends StatefulWidget {
 
   MovieDetailPage({Key key, this.movie}) : super(key: key);
 
-
   final MovieDetail movie;
 
   @override
@@ -53,12 +52,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return scaffoldWidget();
-//    return SafeArea(
-//      child: scaffoldWidget(),
-//    );
-
   }
 
   Scaffold scaffoldWidget(){
@@ -107,13 +101,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
 
   Widget bodyWidget(){
-
     return contentSliverListView();
-//    return Padding(
-//        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-//        child: contentsListView()
-//    );
-
   }
 
   Widget contentSliverListView(){
@@ -133,7 +121,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
             onPressed: (){
               _shareMovie();
             },
-          )
+          ),
         ],
       ),
       SliverPadding(
@@ -141,7 +129,6 @@ class _MovieDetailState extends State<MovieDetailPage> {
         sliver: SliverList(
             delegate: SliverChildListDelegate(contentsItems())),
       ),
-
     ]);
 
   }
@@ -154,7 +141,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
     List<Widget> items = <Widget>[];
     items.add(titleCell(movieDetail.movie.title));
 
-    if (imageUrl != null) {
+    if (imageUrl != null && imageUrl.length > 0) {
       var temp = Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Container(
@@ -180,6 +167,9 @@ class _MovieDetailState extends State<MovieDetailPage> {
         items.add(castCell(cast));
       }
     }
+
+    items.add(tmdbCell());
+
 
     return items;
   }
@@ -273,24 +263,25 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
   Widget castCell(Cast cast){
 
+    var imageUrl = cast.profileUrl(PosterSize.normal);
+    Widget imageWidget = Image.asset('lib/images/no_poster_image.png');
+    if (imageUrl != null && imageUrl.length > 0){
+      imageWidget = FadeInImage.assetNetwork(
+        fit: BoxFit.contain,
+        placeholder: 'lib/images/no_poster_image.png',
+        image: imageUrl,
+      );
+    }
+
     var cell = Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-          //     bottom: BorderSide(color: Colors.black38),
-          ),
-        ),
         child: Row(
           children: <Widget>[
             Container(
               height: 100,
               width: 80,
-              child: FadeInImage.assetNetwork(
-                fit: BoxFit.contain,
-                placeholder: 'lib/images/no_poster_image.png',
-                image: cast.profileUrl(PosterSize.normal),
-              ),
+              child: imageWidget,
             ),
             Container(
               width: 10,
@@ -320,6 +311,32 @@ class _MovieDetailState extends State<MovieDetailPage> {
         },
         child: cell);
 
+  }
+
+  Widget tmdbCell(){
+
+    var btn = FlatButton(
+        padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+          onPressed: (){
+            var url = movieDetail.movie.tmdbUrl();
+            if (url != null){
+              canLaunch(url).then((canOpen){
+                print("canOpen $canOpen");
+                if (canOpen == true){
+                  launch(url);
+                }
+              });
+            }
+          },
+          child: Image.asset("lib/images/tmdb_poweredby.png"));
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(),
+        btn,
+        Container(),
+      ],
+    );
   }
 
 

@@ -40,7 +40,6 @@ class _InfoPageState extends State<InfoPage> {
     );
     if (md != null && md.length > 0){
       body = Markdown(data: md);
-
     }
 
     return Scaffold(
