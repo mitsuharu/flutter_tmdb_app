@@ -13,7 +13,7 @@ PODS:
 
 DEPENDENCIES:
   - device_calendar (from `.symlinks/plugins/device_calendar/ios`)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - image_downloader (from `.symlinks/plugins/image_downloader/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - share (from `.symlinks/plugins/share/ios`)
@@ -23,7 +23,7 @@ EXTERNAL SOURCES:
   device_calendar:
     :path: ".symlinks/plugins/device_calendar/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   image_downloader:
     :path: ".symlinks/plugins/image_downloader/ios"
   path_provider:
