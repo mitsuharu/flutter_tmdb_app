@@ -2,8 +2,6 @@ PODS:
   - device_calendar (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - image_downloader (0.0.1):
-    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - share (0.5.2):
@@ -14,7 +12,6 @@ PODS:
 DEPENDENCIES:
   - device_calendar (from `.symlinks/plugins/device_calendar/ios`)
   - Flutter (from `.symlinks/flutter/ios-release`)
-  - image_downloader (from `.symlinks/plugins/image_downloader/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
@@ -24,8 +21,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_calendar/ios"
   Flutter:
     :path: ".symlinks/flutter/ios-release"
-  image_downloader:
-    :path: ".symlinks/plugins/image_downloader/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   share:
@@ -36,7 +31,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_calendar: 23b28a5f1ab3bf77e34542fb1167e1b8b29a98f5
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
-  image_downloader: e5e747da37f5270b2d549747fcef9d276224d7b1
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   share: 7d22fe8baedfe93aefd864bf0b73f29711fbb0a3
   url_launcher: 0067ddb8f10d36786672aa0722a21717dba3a298
