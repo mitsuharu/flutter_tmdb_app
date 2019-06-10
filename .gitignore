@@ -1,3 +1,6 @@
+key.jks
+*.jks
+
 # API
 lib/models/api_key.dart
 #class ApiConstants{
