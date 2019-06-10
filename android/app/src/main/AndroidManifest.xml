@@ -11,7 +11,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="flutter_tmdb_app"
+        android:label="最近映画"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

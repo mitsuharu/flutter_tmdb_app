@@ -22,7 +22,6 @@ dependencies:
 
   # network
   http: ^0.12.0+2
-  image_downloader: ^0.15.4
   url_launcher: ^5.0.3
 
   # ui

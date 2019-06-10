@@ -1,6 +1,8 @@
 key.jks
 *.jks
 
+key.properties
+
 # API
 lib/models/api_key.dart
 #class ApiConstants{
@@ -78,3 +80,4 @@ lib/models/api_key.dart
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 ios/Frameworks/
+gen/
