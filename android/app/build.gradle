@@ -43,6 +43,25 @@ android {
         disable 'InvalidPackage'
     }
 
+//    splits {
+//        // Configures multiple APKs based on ABI.
+//        abi {
+//            // Enables building multiple APKs per ABI.
+//            enable true
+//            // By default all ABIs are included, so use reset() and include to specify that we only
+//            // want APKs for armeabi-v7a and arm64-v8a.
+//
+//            // Resets the list of ABIs that Gradle should create APKs for to none.
+//            reset()
+//
+//            // Specifies a list of ABIs that Gradle should create APKs for.
+//            include "armeabi-v7a", "arm64-v8a"
+//
+//            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
+//            universalApk false
+//        }
+//    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "net.mituwa.recentmovies"
@@ -51,8 +70,9 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        versionCode 4
-        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
+        versionCode 2
+//        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
+        ndk.abiFilters "armeabi-v7a",'arm64-v8a'
 
     }
 
