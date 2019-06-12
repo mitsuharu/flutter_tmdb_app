@@ -340,13 +340,13 @@ class _MovieDetailState extends State<MovieDetailPage> {
   }
 
 
-  Future<ui.Image> _getImage(String url) {
-    Completer<ui.Image> completer = new Completer<ui.Image>();
-    new NetworkImage(url)
-        .resolve(new ImageConfiguration())
-        .addListener((ImageInfo info, bool _) => completer.complete(info.image));
-    return completer.future;
-  }
+//  Future<ui.Image> _getImage(String url) {
+//    Completer<ui.Image> completer = new Completer<ui.Image>();
+//    new NetworkImage(url)
+//        .resolve(new ImageConfiguration())
+//        .addListener((ImageInfo info, bool _) => completer.complete(info.image));
+//    return completer.future;
+//  }
 
 
 }
