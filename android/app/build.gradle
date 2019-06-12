@@ -70,11 +70,9 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        versionCode 4
-//        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
-//        ndk.abiFilters "armeabi-v7a",'arm64-v8a'
-        ndk.abiFilters "armeabi-v7a"
-
+        versionCode 8
+        versionName "1.0.1"
+        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
     }
 
     signingConfigs {
@@ -94,7 +92,6 @@ android {
 
             minifyEnabled true
             useProguard true
-
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
         }
