@@ -9,7 +9,7 @@ import '../models/tmdb_models.dart';
 import '../models/tmdb_responses.dart';
 import '../widgets/movie_card.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:toast/toast.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../widgets/movie_list_page.dart';
 import 'package:share/share.dart';
 
@@ -84,7 +84,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
       if (result == false){
         str = Constant.cal.errorMessage;
       }
-      Toast.show(str, context);
+      Fluttertoast.showToast(msg:str);
     });
   }
 

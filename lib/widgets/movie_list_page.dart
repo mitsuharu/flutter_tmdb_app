@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:toast/toast.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
 import '../models/api.dart';
 import '../models/tmdb_models.dart';
@@ -183,7 +183,7 @@ class _MovieListState extends State<MovieListPage> {
       if (result == false){
         str = Constant.cal.errorMessage;
       }
-      Toast.show(str, context);
+      Fluttertoast.showToast(msg: str);
     });
   }
 
