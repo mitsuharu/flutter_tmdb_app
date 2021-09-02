@@ -1,11 +1,13 @@
-import 'api_key.dart';
 
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'tmdb_models.dart';
-import 'tmdb_responses.dart';
+import 'tmdb/tmdb_api.dart';
+import 'tmdb/responses.dart';
+
+import 'tmdb/cast.dart';
+import 'tmdb/move_detail.dart';
 
 /*
 
@@ -22,7 +24,7 @@ https://qiita.com/yasutaka_ono/items/6d2a0d3b0856598f9788
 */
 
 
-class ApiManager{
+class Api{
 
   bool isRequesting = false;
 
@@ -30,7 +32,7 @@ class ApiManager{
   Future<MoviesResponse> requestMovies(int page) async{
     this.isRequesting = true;
 
-    var uri = Tmdb.uriDiscoverMovies(page);
+    var uri = TmdbApi.uriDiscoverMovies(page);
     http.Response response = await http.get(uri);
     var jsonData = json.decode(response.body);
 
@@ -56,12 +58,12 @@ class ApiManager{
     res.casts = <Cast>[];
 
     // movie
-    var movieUri = Tmdb.uriMovieDetail(movieId);
+    var movieUri = TmdbApi.uriMovieDetail(movieId);
     http.Response movieResponse = await http.get(movieUri);
     res.movie = MovieDetail(json.decode(movieResponse.body));
 
     // cast
-    var castUri = Tmdb.uriMovieCasts(movieId);
+    var castUri = TmdbApi.uriMovieCasts(movieId);
     http.Response castResponse = await http.get(castUri);
     var castJsonData = json.decode(castResponse.body);
     for (var j in castJsonData["cast"]){
@@ -76,7 +78,7 @@ class ApiManager{
   Future<MoviesResponse> requestMoviesWithCast(int personId, int page) async{
     this.isRequesting = true;
 
-    var uri = Tmdb.uriDiscoverMoviesWithCast(personId, page);
+    var uri = TmdbApi.uriDiscoverMoviesWithCast(personId, page);
     http.Response response = await http.get(uri);
     var jsonData = json.decode(response.body);
 

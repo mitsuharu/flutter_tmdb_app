@@ -4,14 +4,16 @@ import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../constants.dart';
-import '../models/api.dart';
-import '../models/tmdb_models.dart';
-import '../models/tmdb_responses.dart';
+import '../api/api.dart';
+import '../api/tmdb/responses.dart';
 import '../widgets/movie_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../widgets/movie_list_page.dart';
 import 'package:share/share.dart';
+import '../api/tmdb/util.dart';
+import '../api/tmdb/cast.dart';
+import '../api/tmdb/move_detail.dart';
 
 
 /// 動画詳細ページ
@@ -28,14 +30,14 @@ class MovieDetailPage extends StatefulWidget {
 class _MovieDetailState extends State<MovieDetailPage> {
 
   MovieDetailResponse movieDetail;
-  ApiManager ap;
+  Api api;
 
   @override
   void initState() {
     super.initState();
 
-    ap = ApiManager();
-    ap.requestMovieDetail(widget.movie.movieId).then((res){
+    api = Api();
+    api.requestMovieDetail(widget.movie.movieId).then((res){
       if(res != null && res is MovieDetailResponse){
         setState(() {
           this.movieDetail = res;

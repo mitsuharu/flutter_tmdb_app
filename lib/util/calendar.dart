@@ -114,7 +114,7 @@ class UtilCalendar{
         if (cal.isReadOnly){
           continue;
         }
-        Event event = Event(cal.id);
+        Event event = Event(cal.id, availability: Availability.Free);
         event.title = title;
         event.start = date;
         event.end = date.add(new Duration(days: 1));

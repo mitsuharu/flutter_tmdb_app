@@ -1,4 +1,5 @@
-import 'tmdb_models.dart';
+import 'cast.dart';
+import 'move_detail.dart';
 
 class Page{
   int current;

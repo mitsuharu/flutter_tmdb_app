@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/tmdb_models.dart';
-
+import '../api/tmdb/util.dart';
+import '../api/tmdb/move_detail.dart';
 
 class SpaceBox extends SizedBox {
   SpaceBox({double width = 8, double height = 8})
