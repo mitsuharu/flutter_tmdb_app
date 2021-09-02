@@ -1,12 +1,7 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ui' as ui;
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../api/api.dart';
 import '../api/tmdb/responses.dart';
-import '../widgets/movie_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../widgets/movie_list_page.dart';
@@ -317,8 +312,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
   Widget tmdbCell(){
 
-    var btn = FlatButton(
-        padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+    var btn = TextButton(
           onPressed: (){
             var url = movieDetail.movie.tmdbUrl();
             if (url != null){
