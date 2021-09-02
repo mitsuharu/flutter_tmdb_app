@@ -2,12 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
-import '../models/api.dart';
-import '../models/tmdb_models.dart';
-import '../models/tmdb_responses.dart';
+import '../api/api.dart';
+import '../api/tmdb/responses.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/movie_detail_page.dart';
 import '../widgets/info_page.dart';
+import '../api/tmdb/cast.dart';
+import '../api/tmdb/move_detail.dart';
 
 /// 前後数か月公開の映画の一覧です
 class MovieListPage extends StatefulWidget {
@@ -24,7 +25,7 @@ class _MovieListState extends State<MovieListPage> {
   Cast cast;
 
   String title;
-  ApiManager ap = ApiManager();
+  Api api = Api();
   int page = 1;
   bool hasNextPage = false;
   List<MovieDetail> movies = <MovieDetail>[];
@@ -73,7 +74,7 @@ class _MovieListState extends State<MovieListPage> {
       lastRequestedAt = DateTime.now();
     }
 
-    MoviesResponse res = await ap.requestMoviesForMainPage(personId, page);
+    MoviesResponse res = await api.requestMoviesForMainPage(personId, page);
     if (res != null){
       this.hasNextPage = res.page.hasNext();
       if(res.movies.length > 0){
@@ -218,7 +219,7 @@ class _MovieListState extends State<MovieListPage> {
 
     const threshold = 0.8;
     if (positionRate > threshold
-        && ap.isRequesting == false && this.hasNextPage == true) {
+        && api.isRequesting == false && this.hasNextPage == true) {
       this.page += 1;
       requestAPIs(this.page);
     }
