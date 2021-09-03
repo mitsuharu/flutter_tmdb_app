@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api/tmdb/util.dart';
-import '../api/tmdb/move_detail.dart';
+import '../api/tmdb/movie.dart';
 
 class SpaceBox extends SizedBox {
   SpaceBox({double width = 8, double height = 8})
@@ -12,18 +12,18 @@ class SpaceBox extends SizedBox {
 
 class MovieCard extends StatefulWidget {
 
-  final MovieDetail movie;
+  final Movie movie;
   final VoidCallback onTapCell;
   final VoidCallback onTapIcon;
 
-  MovieCard({this.movie, this.onTapCell, this.onTapIcon});
+  MovieCard({required this.movie, required this.onTapCell, required this.onTapIcon});
 
   @override
   _MovieCardState createState() => _MovieCardState(movie, onTapCell, onTapIcon);
 }
 
 class _MovieCardState extends State<MovieCard> {
-  MovieDetail movie;
+  Movie movie;
   VoidCallback onTapCell;
   VoidCallback onTapIcon;
 

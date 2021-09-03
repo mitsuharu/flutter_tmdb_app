@@ -6,7 +6,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 /// お知らせページ
 class InfoPage extends StatefulWidget {
-  InfoPage({Key key}) : super(key: key);
+  InfoPage({Key? key}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -14,7 +14,7 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
 
-  String md;
+  String md = "";
 
   @override
   void initState() {

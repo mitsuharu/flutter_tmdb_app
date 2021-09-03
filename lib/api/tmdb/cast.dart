@@ -1,32 +1,33 @@
+import 'dart:convert';
+
 import './util.dart' as util;
 
 /// キャスト
 class Cast{
-  int castId;
-  int personId;
-  String character;
-  String name;
-  String profilePath;
+  int castId = 0;
+  int personId = 0;
+  String character = "";
+  String name = "";
+  String? profilePath ;
 
-  Cast(Map<String, dynamic> json) {
+  Cast();
+  Cast.fromJson(String json) {
     try{
-    if (json == null) {
-      return;
-    }
-
-    this.castId = json["cast_id"];
-    this.personId = json["id"];
-    this.character = json["character"];
-    this.name = json["name"];
-    this.profilePath = json["profile_path"];
+      Map<String, dynamic> dict = jsonDecode(json);
+      castId = dict["cast_id"];
+      personId = dict["id"];
+      character = dict["character"];
+      name = dict["name"];
+      profilePath = dict["profile_path"];
     }catch(e){
       print("Cast $e");
+      throw e;
     }
   }
 
   String profileUrl(util.PosterSize size){
-    if (this.profilePath != null){
-      return util.profileUrl(this.profilePath, size);
+    if (profilePath != null && profilePath!.length > 0){
+      return util.profileUrl(profilePath!, size);
     }
     return "";
   }

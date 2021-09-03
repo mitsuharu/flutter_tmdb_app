@@ -4,10 +4,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'tmdb/tmdb_api.dart';
-import 'tmdb/responses.dart';
+import 'tmdb/movies_response.dart';
 
 import 'tmdb/cast.dart';
-import 'tmdb/move_detail.dart';
+import 'tmdb/movie.dart';
+import 'tmdb/movie_detail.dart';
+import 'tmdb/page.dart';
 
 /*
 
@@ -34,15 +36,8 @@ class Api{
 
     var uri = TmdbApi.uriDiscoverMovies(page);
     http.Response response = await http.get(uri);
-    var jsonData = json.decode(response.body);
 
-    var res = MoviesResponse();
-    res.page = Page(jsonData);
-    res.movies = <MovieDetail>[];
-
-    for (var j in jsonData["results"]){
-      res.movies.add(MovieDetail(j));
-    }
+    var res = MoviesResponse.fromJson(response.body);
 
     this.isRequesting = false;
     return res;
@@ -50,25 +45,18 @@ class Api{
 
 
   /// 動画詳細を取得する
-  Future<MovieDetailResponse> requestMovieDetail(int movieId) async{
+  Future<MovieDetail> requestMovieDetail(int movieId) async{
     this.isRequesting = true;
-
-    MovieDetailResponse res = MovieDetailResponse();
-    res.movie = null;
-    res.casts = <Cast>[];
 
     // movie
     var movieUri = TmdbApi.uriMovieDetail(movieId);
     http.Response movieResponse = await http.get(movieUri);
-    res.movie = MovieDetail(json.decode(movieResponse.body));
 
     // cast
     var castUri = TmdbApi.uriMovieCasts(movieId);
     http.Response castResponse = await http.get(castUri);
-    var castJsonData = json.decode(castResponse.body);
-    for (var j in castJsonData["cast"]){
-      res.casts.add(Cast(j));
-    }
+
+    MovieDetail res = MovieDetail.fromJson(movieResponse.body, castResponse.body);
 
     this.isRequesting = false;
     return res;
@@ -80,29 +68,18 @@ class Api{
 
     var uri = TmdbApi.uriDiscoverMoviesWithCast(personId, page);
     http.Response response = await http.get(uri);
-    var jsonData = json.decode(response.body);
 
-    var res = MoviesResponse();
-    res.page = Page(jsonData);
-    res.movies = <MovieDetail>[];
-
-    for (var j in jsonData["results"]){
-      res.movies.add(MovieDetail(j));
-    }
+    var res = MoviesResponse.fromJson(response.body);
 
     this.isRequesting = false;
     return res;
   }
 
-  Future<MoviesResponse> requestMoviesForMainPage(int personId, int page) async{
-
+  Future<MoviesResponse> requestMoviesForMainPage(int? personId, int page) async{
     if (personId == null){
       return requestMovies(page);
     }else{
       return requestMoviesWithCast(personId, page);
     }
   }
-
-
-
 }

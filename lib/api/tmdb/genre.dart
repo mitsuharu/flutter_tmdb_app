@@ -1,28 +1,28 @@
+import 'dart:convert';
+import 'dart:ffi';
+
 /// ジャンル
 class Genre{
-  int genreId;
-  String name;
+  int genreId = 0;
+  String name = "";
 
-  Genre(Map<String, dynamic> json) {
-    if(json == null){
-      return;
+  Genre.fromJson(String json) {
+    try {
+      Map<String, dynamic> dict = jsonDecode(json);
+      genreId = dict["id"];
+      name = dict["name"];
+    }catch(e){
+      print("Genre $e");
+      throw e;
     }
-    this.genreId = json["id"];
-    this.name = json["name"];
   }
 
-  static List<Genre> genresFormJsonList(var jsonList) {
-    if(jsonList == null){
-      return null;
+  static List<Genre> genresFormJsonList(List<dynamic> jsonList) {
+    try {
+      return jsonList.map((e) => Genre.fromJson(jsonEncode(e))).toList();
+    }catch(e){
+      print("Genre#genresFormJsonList $e");
+      throw e;
     }
-
-    List<Genre> genres = <Genre>[];
-    for (var temp in jsonList){
-      var genre = Genre(temp);
-      if (genre != null && genre is Genre){
-        genres.add(genre);
-      }
-    }
-    return genres;
   }
 }
