@@ -34,13 +34,19 @@ DateTime string2date(String str){
   return format.parse(str);
 }
 
-String posterUrl(String path, PosterSize size){
+String posterUrl(String? path, PosterSize size){
+  if (path == null){
+    return "";
+  }
   const String baseUrl = "http://image.tmdb.org/t/p/";
   String tempSize = size == PosterSize.large ? "w342": "w185";
   return baseUrl + tempSize + path;
 }
 
-String profileUrl(String path, PosterSize size){
+String profileUrl(String? path, PosterSize size){
+  if (path == null){
+    return "";
+  }
   const String baseUrl = "http://image.tmdb.org/t/p/";
   String tempSize = "w185";
   // String tempSize = size == PosterSize.large ? "w342": "w185";

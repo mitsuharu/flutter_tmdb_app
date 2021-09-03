@@ -18,8 +18,13 @@ class Collection{
       Map<String, dynamic> dict = jsonDecode(json);
       collectionId = dict["id"];
       name = dict["name"];
-      posterPath = util.posterUrl(dict["poster_path"], util.PosterSize.normal);
-      backdropPath = util.posterUrl(dict["backdrop_path"], util.PosterSize.normal);
+
+      if (dict["poster_path"] != null){
+        posterPath = util.posterUrl(dict["poster_path"], util.PosterSize.normal);
+      }
+      if (dict["backdrop_path"] != null){
+        backdropPath = util.posterUrl(dict["backdrop_path"], util.PosterSize.normal);
+      }
     }catch(e){
       print("Collection $e");
       throw e;
