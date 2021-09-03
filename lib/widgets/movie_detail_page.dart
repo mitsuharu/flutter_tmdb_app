@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../api/api.dart';
-import '../api/tmdb/responses.dart';
+import '../api/tmdb/movie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../widgets/movie_list_page.dart';
 import 'package:share/share.dart';
 import '../api/tmdb/util.dart';
 import '../api/tmdb/cast.dart';
-import '../api/tmdb/move_detail.dart';
+import '../api/tmdb/movie_detail.dart';
 
 
 /// 動画詳細ページ
 class MovieDetailPage extends StatefulWidget {
 
-  MovieDetailPage({Key key, this.movie}) : super(key: key);
+  MovieDetailPage({Key? key, required this.movie}) : super(key: key);
 
-  final MovieDetail movie;
+  final Movie movie;
 
   @override
   _MovieDetailState createState() => _MovieDetailState();
@@ -24,8 +24,8 @@ class MovieDetailPage extends StatefulWidget {
 
 class _MovieDetailState extends State<MovieDetailPage> {
 
-  MovieDetailResponse movieDetail;
-  Api api;
+  MovieDetail movieDetail = MovieDetail();
+  Api api = Api();
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
     api = Api();
     api.requestMovieDetail(widget.movie.movieId).then((res){
-      if(res != null && res is MovieDetailResponse){
+      if(res != null && res is MovieDetail){
         setState(() {
           this.movieDetail = res;
         });
@@ -88,7 +88,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
   void _shareMovie(){
 
     var text = movieDetail.movie.title;
-    if (movieDetail.movie.homepage != null && movieDetail.movie.homepage.length > 0){
+    if (movieDetail.movie.homepage != null && movieDetail.movie.homepage!.length > 0){
       text += " ${movieDetail.movie.homepage}";
     }
 
@@ -156,7 +156,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
     items.add(dateCell());
 
     if (movieDetail.movie.homepage != null
-        && movieDetail.movie.homepage.length > 0){
+        && movieDetail.movie.homepage!.length > 0){
       items.add(homepageCell());
     }
     if (movieDetail.casts != null){
@@ -303,7 +303,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => page),
           ).then((_){
-            page = null;
+            // page = null;
           });
         },
         child: cell);

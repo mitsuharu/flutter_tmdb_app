@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
 import '../api/api.dart';
-import '../api/tmdb/responses.dart';
+import '../api/tmdb/movies_response.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/movie_detail_page.dart';
 import '../widgets/info_page.dart';
 import '../api/tmdb/cast.dart';
-import '../api/tmdb/move_detail.dart';
+import '../api/tmdb/movie.dart';
 
 /// 前後数か月公開の映画の一覧です
 class MovieListPage extends StatefulWidget {
-  MovieListPage({Key key, this.cast}) : super(key: key);
+  MovieListPage({Key? key, this.cast}) : super(key: key);
 
-  final Cast cast;
+  final Cast? cast;
 
   @override
   _MovieListState createState() => _MovieListState(cast: this.cast);
@@ -22,18 +22,18 @@ class MovieListPage extends StatefulWidget {
 
 class _MovieListState extends State<MovieListPage> {
 
-  Cast cast;
+  Cast? cast;
 
-  String title;
+  String title = "";
   Api api = Api();
   int page = 1;
   bool hasNextPage = false;
-  List<MovieDetail> movies = <MovieDetail>[];
+  List<Movie> movies = <Movie>[];
 
-  DateTime lastRequestedAt;
+  DateTime lastRequestedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   // スクロール検知
-  ScrollController _scrollController;
+  ScrollController _scrollController = ScrollController();
 
   /// コンストラクタ
   _MovieListState({this.cast});
@@ -47,7 +47,7 @@ class _MovieListState extends State<MovieListPage> {
     if (this.cast == null){
       title = Constant.app.mainTitle;
     }else{
-      title = "${this.cast.name}";
+      title = "${this.cast!.name}";
     }
 
     requestAPIs(this.page);
@@ -63,18 +63,24 @@ class _MovieListState extends State<MovieListPage> {
 
   Future<int> requestAPIs(int page) async{
 
-    int personId;
+    int? personId;
     if (this.cast != null){
-      personId = this.cast.personId;
+      personId = this.cast!.personId;
     }else{
       personId = null;
     }
 
+    print("requestAPIs page: $page, personId: $personId");
+
     if (page == 1 || lastRequestedAt == null){
       lastRequestedAt = DateTime.now();
     }
+    print("requestAPIs page: $page, lastRequestedAt: $lastRequestedAt");
+
 
     MoviesResponse res = await api.requestMoviesForMainPage(personId, page);
+    print("requestAPIs page: $page, res: $res");
+
     if (res != null){
       this.hasNextPage = res.page.hasNext();
       if(res.movies.length > 0){
@@ -133,7 +139,7 @@ class _MovieListState extends State<MovieListPage> {
 
         var title = Constant.commons.nowLoading;
         if (index < this.movies.length){
-          MovieDetail movie = movies[index];
+          Movie movie = movies[index];
           title = movie.title;
 
           return Container(
@@ -170,7 +176,7 @@ class _MovieListState extends State<MovieListPage> {
   }
 
   /// 詳細ページを開く
-  void _showMovieDetailPage(MovieDetail movie){
+  void _showMovieDetailPage(Movie movie){
     var page = MovieDetailPage(movie: movie,);
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => page),
@@ -178,7 +184,7 @@ class _MovieListState extends State<MovieListPage> {
   }
 
   /// カレンダーに登録する
-  void _registerToCalendar(MovieDetail movie){
+  void _registerToCalendar(Movie movie){
     movie.addToCalendar().then((result){
       var str = Constant.cal.successMessage;
       if (result == false){
@@ -202,7 +208,7 @@ class _MovieListState extends State<MovieListPage> {
     }else{
       this.page = 1;
       setState(() {
-        this.movies = <MovieDetail>[];
+        this.movies = <Movie>[];
       });
 
       await requestAPIs(this.page);

@@ -1,31 +1,29 @@
+import 'dart:convert';
+
 import './util.dart' as util;
 
 /// コレクション（シリーズ）
 class Collection{
 
-  int collectionId;
-  String name;
-  String posterPath;
-  String backdropPath;
+  int collectionId = 0;
+  String name = "";
+  String posterPath = "";
+  String backdropPath = "";
 
-  Collection(Map<String, dynamic> json) {
+  Collection();
+
+  Collection.fromJson(String json) {
     try{
-      if(json == null){
-        return;
-      }
-
-      this.collectionId = json["id"];
-      this.name = json["name"];
-
-      // サムネイル
-      this.posterPath = util.posterUrl(json["poster_path"], util.PosterSize.normal);
-      this.backdropPath = util.posterUrl(json["backdrop_path"], util.PosterSize.normal);
-      
-
+      print("Collection json: $json");
+      Map<String, dynamic> dict = jsonDecode(json);
+      collectionId = dict["id"];
+      name = dict["name"];
+      posterPath = util.posterUrl(dict["poster_path"], util.PosterSize.normal);
+      backdropPath = util.posterUrl(dict["backdrop_path"], util.PosterSize.normal);
     }catch(e){
       print("Collection $e");
+      throw e;
     }
-
   }
 
 //  "id": 86311,

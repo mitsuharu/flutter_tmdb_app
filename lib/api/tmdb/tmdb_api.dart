@@ -16,9 +16,6 @@ class TmdbApi{
 
   /// 動画詳細用のURI
   static uriMovieDetail(int movieId){
-    if(movieId == null){
-      return null;
-    }
     var uri = Uri.https(
         TmdbApi._baseUrl,
         "${TmdbApi._pathMovie}$movieId",
@@ -28,9 +25,6 @@ class TmdbApi{
 
   /// 動画キャスト用のURI
   static uriMovieCasts(int movieId){
-    if(movieId == null){
-      return null;
-    }
     var uri = Uri.https(
         TmdbApi._baseUrl,
         "${TmdbApi._pathMovie}$movieId/credits",
