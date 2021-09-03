@@ -20,7 +20,7 @@ class Cast{
       name = dict["name"];
       profilePath = dict["profile_path"];
     }catch(e){
-      print("Cast $e");
+      print("Cast.fromJson $e");
       throw e;
     }
   }

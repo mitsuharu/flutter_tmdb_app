@@ -18,8 +18,6 @@ class MovieDetail{
       movie = Movie.fromJson(movieJson);
 
       List<dynamic> castList = jsonDecode(castJson)["cast"];
-      print("MovieDetail.fromJson castList:$castList");
-
       casts = castList.map((e) => Cast.fromJson(jsonEncode(e))).toList();
     }catch(e){
       print("MovieDetail.fromJson $e");
@@ -27,13 +25,10 @@ class MovieDetail{
     }
   }
 
-
-
   Future<bool> addToCalendar() async{
     print("[addToCalendar]");
     return await UtilCalendar.addToCalendar(this.movie.title, this.movie.releaseDate!);
   }
-
 }
 
 
