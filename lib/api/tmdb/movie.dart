@@ -22,9 +22,7 @@ class Movie{
   Movie();
   Movie.fromJson(String json) {
     try {
-      print("Movie.fromJson json: $json");
       Map<String, dynamic> dict = jsonDecode(json);
-      print("Movie.fromJson dict: $dict");
 
       movieId = dict["id"];
       isAdult = dict["adult"];
@@ -38,7 +36,7 @@ class Movie{
       runtime = dict["runtime"];
 
       if (dict["belongs_to_collection"] != null){
-        collection = Collection.fromJson(dict["belongs_to_collection"]);
+        collection = Collection.fromJson(jsonEncode(dict["belongs_to_collection"]));
       }
 
       if (dict["genres"] != null){
