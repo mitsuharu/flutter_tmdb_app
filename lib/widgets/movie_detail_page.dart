@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/util/calendar.dart';
 import '../constants.dart';
 import '../api/api.dart';
 import '../api/tmdb/movie.dart';
@@ -75,14 +76,10 @@ class _MovieDetailState extends State<MovieDetailPage> {
   }
 
 
-  void _addToCalendar(){
-    movieDetail.movie.addToCalendar().then((result){
-      var str = Constant.cal.successMessage;
-      if (result == false){
-        str = Constant.cal.errorMessage;
-      }
-      Fluttertoast.showToast(msg:str);
-    });
+  void _addToCalendar() async{
+    var result = await UtilCalendar.addToCalendar(movieDetail.movie.title, movieDetail.movie.releaseDate!);
+    var str = result ? Constant.cal.successMessage : Constant.cal.errorMessage;
+    Fluttertoast.showToast(msg: str);
   }
 
   void _shareMovie(){

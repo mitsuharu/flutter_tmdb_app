@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/util/calendar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
 import '../api/api.dart';
@@ -184,14 +185,10 @@ class _MovieListState extends State<MovieListPage> {
   }
 
   /// カレンダーに登録する
-  void _registerToCalendar(Movie movie){
-    movie.addToCalendar().then((result){
-      var str = Constant.cal.successMessage;
-      if (result == false){
-        str = Constant.cal.errorMessage;
-      }
-      Fluttertoast.showToast(msg: str);
-    });
+  Future<void> _registerToCalendar(Movie movie) async {
+    var result = await UtilCalendar.addToCalendar(movie.title, movie.releaseDate!);
+    var str = result ? Constant.cal.successMessage : Constant.cal.errorMessage;
+    Fluttertoast.showToast(msg: str);
   }
 
 
