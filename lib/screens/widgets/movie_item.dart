@@ -34,12 +34,14 @@ class _MovieItemState extends State<MovieItem> {
   Future<void> _registerToCalendar() async {
     try {
       var result = await UtilCalendar.addToCalendar(
-          movie.title, movie.releaseDate!);
-      var str = result ? Constant.cal.successMessage : Constant.cal
-          .errorMessage;
+          movie.title,
+          movie.releaseDate!);
+      var str = result
+          ? Constant.cal.successMessage
+          : Constant.cal.errorMessage;
       Fluttertoast.showToast(msg: str);
     }catch(e){
-      print("_registerToCalendar $e");
+      print("MovieItem#_registerToCalendar $e");
       Fluttertoast.showToast(msg: Constant.cal.errorMessage);
     }
   }

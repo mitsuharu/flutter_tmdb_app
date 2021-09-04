@@ -1,44 +1,35 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:device_calendar/device_calendar.dart';
-// ignore: implementation_imports
-import 'package:timezone/src/date_time.dart';
-
-/*
-
-flutter_plugins/main.dart at develop · builttoroam/flutter_plugins
-https://github.com/builttoroam/flutter_plugins/blob/develop/device_calendar/example/lib/main.dart
-
-
-device_calendar | Flutter Package
-https://pub.dev/packages/device_calendar#-readme-tab-
-
- */
-
+import 'package:timezone/timezone.dart' as tz;
 
 class UtilCalendar{
 
   DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
   List<Calendar> calendars = [];
   Calendar defaultCalendar = Calendar();
-
   UtilCalendar(): super();
 
   static Future<bool> addToCalendar(String title, DateTime date) async {
-    UtilCalendar cal = UtilCalendar();
-    bool auth = await cal.retrieveCalendars();
-    if (auth == false){
-      return false;
+    try {
+      UtilCalendar cal = UtilCalendar();
+      bool auth = await cal._retrieveCalendars();
+      if (auth == false) {
+        return false;
+      }
+      bool exist = await cal._retrieveCalendarEvents(title, date);
+      if (exist == false) {
+        bool result = await cal._addEvent(title, date);
+        return result;
+      }
+      return exist;
+    }catch(e){
+      print("UtilCalendar#addToCalendar $e");
+      throw e;
     }
-    bool exist = await cal.retrieveCalendarEvents(title, date);
-    if (exist == false){
-      bool result =  await cal.addEvents(title, date);
-      return result;
-    }
-    return exist;
   }
 
-  Future<bool> retrieveCalendars() async {
+  /// カレンダーの認証を確認する
+  Future<bool> _retrieveCalendars() async {
     try {
       _deviceCalendarPlugin = DeviceCalendarPlugin();
       var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
@@ -52,47 +43,19 @@ class UtilCalendar{
       final result = await _deviceCalendarPlugin.retrieveCalendars();
       calendars = result.data!;
 
-      // カレンダーを並び替える
-      calendars.sort((cal0, cal1){
-
-        int score0 = 0;
-        int score1 = 0;
-
-        // それっぽい名前を優先する
-        var temps = ["movie", "film", "cinema", "映画", "private", "予定", "schedule"];
-        for (var temp in temps){
-          if (cal0.name != null && cal0.name!.toLowerCase().contains(temp) == true){
-            score0 = 1;
-          }
-          if (cal1.name != null && cal1.name!.toLowerCase().contains(temp) == true){
-            score1 = 1;
-          }
-        }
-
-        // 書き込み可能を優先する
-        if (cal0.isReadOnly == false){
-          score0 += 1;
-        }
-        if (cal1.isReadOnly == false){
-          score1 += 1;
-        }
-
-        return (score1 - score0);
-      });
-
       return result.isSuccess;
-    } on PlatformException catch (e) {
-      print("retrieveCalendars e:$e");
+    } catch (e) {
+      print("UtilCalendar#_retrieveCalendars $e");
       return false;
     }
   }
 
-  Future<bool> retrieveCalendarEvents(String title, DateTime date) async {
+  /// すでに登録しているか判定する
+  Future<bool> _retrieveCalendarEvents(String title, DateTime date) async {
     try {
       final startDate = date.add(new Duration(days: -1));
       final endDate = date.add(new Duration(days: 1));
       final params = RetrieveEventsParams(startDate: startDate, endDate: endDate);
-
       for (var cal in calendars) {
         final result = await _deviceCalendarPlugin.retrieveEvents(cal.id, params);
         for (var ev in result.data!){
@@ -103,32 +66,62 @@ class UtilCalendar{
       }
       return false;
     } catch (e) {
-      print("retrieveCalendarEvents $e");
+      print("UtilCalendar#_retrieveCalendarEvents $e");
       return false;
     }
   }
 
-
-  Future<bool> addEvents(String title, DateTime date) async {
-
+  /// 書き込むカレンダーを取得する。
+  /// カレンダーが書込み可能かつ、特定名称を優先に決定する。
+  Calendar? _extractWritableCalendar()  {
     try {
-      for (var cal in calendars){
-        if (cal.isReadOnly!){
-          continue;
+      Calendar? firstWritableCal;
+      List<String> candidates = [
+        "movie",
+        "film",
+        "cinema",
+        "映画",
+        "private",
+        "予定",
+        "schedule"
+      ];
+      for (String candidate in candidates) {
+        for (Calendar cal in calendars) {
+          if (cal.isReadOnly == false) {
+            if (cal.name == candidate) {
+              return cal;
+            }
+            if (firstWritableCal == null) {
+              firstWritableCal = cal;
+            }
+          }
         }
+      }
+      return firstWritableCal;
+    }catch(e){
+      print("UtilCalendar#_extractWritableCalendar $e");
+      return null;
+    }
+  }
+
+  Future<bool> _addEvent(String title, DateTime date) async {
+    try {
+      Calendar? cal = _extractWritableCalendar();
+      if (cal != null) {
+        final tokyo = tz.getLocation("Asia/Tokyo");
         Event event = Event(cal.id, availability: Availability.Free);
         event.title = title;
-        event.start = date as TZDateTime?;
-        event.end = date.add(new Duration(days: 1)) as TZDateTime?;
+        event.start = tz.TZDateTime.from(date, tokyo);
+        event.end = tz.TZDateTime.from(date.add(new Duration(days: 1)), tokyo);
         event.allDay = true;
         final result = await _deviceCalendarPlugin.createOrUpdateEvent(event);
-        if (result!.isSuccess == true){
+        if (result!.isSuccess == true) {
           return true;
         }
       }
       return false;
     }catch(e) {
-      print(e);
+      print("UtilCalendar#_addEvent $e");
       return false;
     }
   }
