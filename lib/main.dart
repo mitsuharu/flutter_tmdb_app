@@ -10,9 +10,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Recent　Movies',
+      locale: Locale("ja", "JP"),
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        textTheme: GoogleFonts.robotoTextTheme (
+        textTheme: GoogleFonts.notoSansTextTheme(
           Theme.of(context).textTheme,
         ),
       ),
