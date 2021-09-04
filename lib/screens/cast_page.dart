@@ -1,22 +1,26 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/api/tmdb/cast.dart';
 import 'package:flutter_tmdb_app/screens/widgets/movie_list.dart';
 import 'package:flutter_tmdb_app/screens/movie_detail_page.dart';
-import '../constants.dart';
 import '../api/api.dart';
 import '../api/tmdb/movies_response.dart';
-import './info_page.dart';
 import '../api/tmdb/movie.dart';
 
 /// 前後数か月公開の映画の一覧です
-class MainPage extends StatefulWidget {
-  MainPage({Key? key}) : super(key: key);
+class CastPage extends StatefulWidget {
+
+  final Cast cast;
+
+  CastPage({Key? key, required this.cast}) : super(key: key);
 
   @override
-  _MainPageState createState() => _MainPageState();
+  _CastPageState createState() => _CastPageState(cast);
 }
 
-class _MainPageState extends State<MainPage> {
+class _CastPageState extends State<CastPage> {
+
+  Cast cast = Cast();
 
   Api api = Api();
   int page = 1;
@@ -25,7 +29,7 @@ class _MainPageState extends State<MainPage> {
   DateTime? lastRequestedAt;
 
   /// コンストラクタ
-  _MainPageState();
+  _CastPageState(this.cast);
 
   @override
   void initState() {
@@ -38,6 +42,7 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
+
   Future<int> requestAPIs(int page) async{
     try {
       print("requestAPIs page: $page");
@@ -46,7 +51,7 @@ class _MainPageState extends State<MainPage> {
         lastRequestedAt = DateTime.now();
       }
 
-      MoviesResponse res = await api.requestMoviesForMainPage(null, page);
+      MoviesResponse res = await api.requestMoviesForMainPage(cast.personId, page);
       this.hasNextPage = res.page.hasNext();
       if (res.movies.length > 0) {
         setState(() {
@@ -113,29 +118,21 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
 
-    Widget infoItem = IconButton(
-        icon: Icon(Icons.info),
-        onPressed: (){
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => InfoPage())
-          );
-        });
-
     var appBar = AppBar(
-      title: Text(Constant.app.mainTitle),
-      actions: [infoItem],
+      title: Text(cast.name),
+      actions: [],
     );
 
     return Scaffold(
-      appBar: appBar,
-      body: MovieList(
+        appBar: appBar,
+        body: MovieList(
           movies: movies,
           isLoading: this.api.isRequesting,
           hasNext: this.hasNextPage,
           onRefresh: _onRefresh,
           onEndReached: _onEndReached,
           onPress: _onPress,
-      )
+        )
     );
   }
 }
