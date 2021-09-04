@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:device_calendar/device_calendar.dart';
+// ignore: implementation_imports
+import 'package:timezone/src/date_time.dart';
 
 /*
 
@@ -17,9 +19,8 @@ https://pub.dev/packages/device_calendar#-readme-tab-
 class UtilCalendar{
 
   DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
-  List<Calendar> calendars;
-
-  Calendar defaultCalendar;
+  List<Calendar> calendars = [];
+  Calendar defaultCalendar = Calendar();
 
   UtilCalendar(): super();
 
@@ -41,14 +42,15 @@ class UtilCalendar{
     try {
       _deviceCalendarPlugin = DeviceCalendarPlugin();
       var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
-      if (permissionsGranted.isSuccess && !permissionsGranted.data) {
+
+      if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
         permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
-        if (!permissionsGranted.isSuccess || !permissionsGranted.data) {
+        if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
           return false;
         }
       }
       final result = await _deviceCalendarPlugin.retrieveCalendars();
-      calendars = result.data;
+      calendars = result.data!;
 
       // カレンダーを並び替える
       calendars.sort((cal0, cal1){
@@ -59,10 +61,10 @@ class UtilCalendar{
         // それっぽい名前を優先する
         var temps = ["movie", "film", "cinema", "映画", "private", "予定", "schedule"];
         for (var temp in temps){
-          if (cal0.name.toLowerCase().contains(temp) == true){
+          if (cal0.name != null && cal0.name!.toLowerCase().contains(temp) == true){
             score0 = 1;
           }
-          if (cal1.name.toLowerCase().contains(temp) == true){
+          if (cal1.name != null && cal1.name!.toLowerCase().contains(temp) == true){
             score1 = 1;
           }
         }
@@ -93,7 +95,7 @@ class UtilCalendar{
 
       for (var cal in calendars) {
         final result = await _deviceCalendarPlugin.retrieveEvents(cal.id, params);
-        for (var ev in result.data){
+        for (var ev in result.data!){
           if (ev.title == title){
             return true;
           }
@@ -111,16 +113,16 @@ class UtilCalendar{
 
     try {
       for (var cal in calendars){
-        if (cal.isReadOnly){
+        if (cal.isReadOnly!){
           continue;
         }
-        Event event = Event(cal.id);
+        Event event = Event(cal.id, availability: Availability.Free);
         event.title = title;
-        event.start = date;
-        event.end = date.add(new Duration(days: 1));
+        event.start = date as TZDateTime?;
+        event.end = date.add(new Duration(days: 1)) as TZDateTime?;
         event.allDay = true;
         final result = await _deviceCalendarPlugin.createOrUpdateEvent(event);
-        if (result.isSuccess == true){
+        if (result!.isSuccess == true){
           return true;
         }
       }

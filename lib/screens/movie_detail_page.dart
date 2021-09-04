@@ -1,25 +1,23 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ui' as ui;
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/screens/cast_page.dart';
+import 'package:flutter_tmdb_app/util/calendar.dart';
 import '../constants.dart';
-import '../models/api.dart';
-import '../models/tmdb_models.dart';
-import '../models/tmdb_responses.dart';
-import '../widgets/movie_card.dart';
+import '../api/api.dart';
+import '../api/tmdb/movie.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:toast/toast.dart';
-import '../widgets/movie_list_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:share/share.dart';
+import '../api/tmdb/util.dart';
+import '../api/tmdb/cast.dart';
+import '../api/tmdb/movie_detail.dart';
 
 
 /// 動画詳細ページ
 class MovieDetailPage extends StatefulWidget {
 
-  MovieDetailPage({Key key, this.movie}) : super(key: key);
+  final Movie movie;
 
-  final MovieDetail movie;
+  MovieDetailPage({Key? key, required this.movie}) : super(key: key);
 
   @override
   _MovieDetailState createState() => _MovieDetailState();
@@ -27,22 +25,17 @@ class MovieDetailPage extends StatefulWidget {
 
 class _MovieDetailState extends State<MovieDetailPage> {
 
-  MovieDetailResponse movieDetail;
-  ApiManager ap;
+  MovieDetail? movieDetail;
+  Api api = Api();
 
   @override
   void initState() {
     super.initState();
-
-    ap = ApiManager();
-    ap.requestMovieDetail(widget.movie.movieId).then((res){
-      if(res != null && res is MovieDetailResponse){
-        setState(() {
-          this.movieDetail = res;
-        });
-      }
+    api.requestMovieDetail(widget.movie.movieId).then((res){
+      setState(() {
+        this.movieDetail = res;
+      });
     });
-
   }
 
   @override
@@ -56,7 +49,6 @@ class _MovieDetailState extends State<MovieDetailPage> {
   }
 
   Scaffold scaffoldWidget(){
-
     if (movieDetail == null){
       return Scaffold(
         appBar: AppBar(),
@@ -74,29 +66,31 @@ class _MovieDetailState extends State<MovieDetailPage> {
             }),
       );
     }
-
   }
 
-
-  void _addToCalendar(){
-    movieDetail.movie.addToCalendar().then((result){
-      var str = Constant.cal.successMessage;
-      if (result == false){
-        str = Constant.cal.errorMessage;
-      }
-      Toast.show(str, context);
-    });
+  void _addToCalendar() async{
+    if (movieDetail != null) {
+      var result = await UtilCalendar.addToCalendar(
+          movieDetail!.movie.title,
+          movieDetail!.movie.releaseDate!);
+      var str = result
+          ? Constant.cal.successMessage
+          : Constant.cal.errorMessage;
+      Fluttertoast.showToast(msg: str);
+    }else{
+      Fluttertoast.showToast(msg: Constant.cal.errorMessage);
+    }
   }
 
   void _shareMovie(){
-
-    var text = movieDetail.movie.title;
-    if (movieDetail.movie.homepage != null && movieDetail.movie.homepage.length > 0){
-      text += " ${movieDetail.movie.homepage}";
+    if (movieDetail != null) {
+      var text = movieDetail!.movie.title;
+      if (movieDetail!.movie.homepage != null &&
+          movieDetail!.movie.homepage!.length > 0) {
+        text += " ${movieDetail!.movie.homepage}";
+      }
+      Share.share(text);
     }
-
-    Share.share(text);
-
   }
 
 
@@ -105,9 +99,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
   }
 
   Widget contentSliverListView(){
-
     return CustomScrollView(slivers: <Widget>[
-
       SliverAppBar(
         forceElevated: true,
         pinned: false,
@@ -136,10 +128,10 @@ class _MovieDetailState extends State<MovieDetailPage> {
   List<Widget> contentsItems(){
 
     final Size size = MediaQuery.of(context).size;
-    var imageUrl = movieDetail.movie.posterUrl(PosterSize.large);
+    var imageUrl = movieDetail!.movie.posterUrl(PosterSize.large);
 
     List<Widget> items = <Widget>[];
-    items.add(titleCell(movieDetail.movie.title));
+    items.add(titleCell(movieDetail!.movie.title));
 
     if (imageUrl != null && imageUrl.length > 0) {
       var temp = Padding(
@@ -151,19 +143,19 @@ class _MovieDetailState extends State<MovieDetailPage> {
       );
       items.add(temp);
     }
-    if (movieDetail.movie.overview != null
-        && movieDetail.movie.overview.length > 0){
-      items.add(paddingCell(movieDetail.movie.overview));
+    if (movieDetail!.movie.overview != null
+        && movieDetail!.movie.overview.length > 0){
+      items.add(paddingCell(movieDetail!.movie.overview));
     }
 
     items.add(dateCell());
 
-    if (movieDetail.movie.homepage != null
-        && movieDetail.movie.homepage.length > 0){
+    if (movieDetail!.movie.homepage != null
+        && movieDetail!.movie.homepage!.length > 0){
       items.add(homepageCell());
     }
-    if (movieDetail.casts != null){
-      for (var cast in movieDetail.casts){
+    if (movieDetail!.casts != null){
+      for (var cast in movieDetail!.casts){
         items.add(castCell(cast));
       }
     }
@@ -226,7 +218,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
           child: IconButton(
               icon: Icon(Icons.home),
               onPressed: (){
-                var url = movieDetail.movie.homepage;
+                var url = movieDetail!.movie.homepage;
                 print("url $url");
                 if (url != null){
                   canLaunch(url).then((canOpen){
@@ -253,7 +245,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
         ),
         child: Center(
           child: Text(
-            movieDetail.movie.releasedAt(),
+            movieDetail!.movie.releasedAt(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),),
         ),
       ),
@@ -302,11 +294,11 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
     return InkWell(
         onTap: () {
-          var page = MovieListPage(cast: cast);
+          var page = CastPage(cast: cast);
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => page),
           ).then((_){
-            page = null;
+            // page = null;
           });
         },
         child: cell);
@@ -315,10 +307,9 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
   Widget tmdbCell(){
 
-    var btn = FlatButton(
-        padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+    var btn = TextButton(
           onPressed: (){
-            var url = movieDetail.movie.tmdbUrl();
+            var url = movieDetail!.movie.tmdbUrl();
             if (url != null){
               canLaunch(url).then((canOpen){
                 print("canOpen $canOpen");
@@ -338,15 +329,4 @@ class _MovieDetailState extends State<MovieDetailPage> {
       ],
     );
   }
-
-
-//  Future<ui.Image> _getImage(String url) {
-//    Completer<ui.Image> completer = new Completer<ui.Image>();
-//    new NetworkImage(url)
-//        .resolve(new ImageConfiguration())
-//        .addListener((ImageInfo info, bool _) => completer.complete(info.image));
-//    return completer.future;
-//  }
-
-
 }
