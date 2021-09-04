@@ -68,12 +68,6 @@ class Movie{
   String tmdbUrl(){
     return "https://www.themoviedb.org/movie/$movieId?language=ja";
   }
-
-  Future<bool> addToCalendar() async{
-    print("[addToCalendar]");
-    return await UtilCalendar.addToCalendar(this.title, this.releaseDate!);
-  }
-
 }
 
 

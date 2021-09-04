@@ -24,11 +24,6 @@ class MovieDetail{
       throw e;
     }
   }
-
-  Future<bool> addToCalendar() async{
-    print("[addToCalendar]");
-    return await UtilCalendar.addToCalendar(this.movie.title, this.movie.releaseDate!);
-  }
 }
 
 
