@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../constants.dart';
-
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 /// お知らせページ
 class InfoPage extends StatefulWidget {
-  InfoPage({Key key}) : super(key: key);
+  InfoPage({Key? key}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -14,12 +13,11 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
 
-  String md;
+  String md = "";
 
   @override
   void initState() {
     super.initState();
-
     readMarkdown();
   }
 
@@ -35,12 +33,9 @@ class _InfoPageState extends State<InfoPage> {
       title: Text(Constant.info.title),
     );
 
-    Widget body = Center(
-      child: CircularProgressIndicator(),
-    );
-    if (md != null && md.length > 0){
-      body = Markdown(data: md);
-    }
+    Widget body = md.length > 0
+        ? Markdown(data: md)
+        : Center(child: CircularProgressIndicator());
 
     return Scaffold(
       appBar: appBar,
@@ -49,16 +44,10 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> readMarkdown() async{
-    final String path = "lib/docments/info.md";
-    rootBundle.loadString(path).then((data){
-      setState(() {
-        md = data;
-      });
+    final String path = "lib/documents/info.md";
+    final text = await rootBundle.loadString(path);
+    setState(() {
+      md = text;
     });
   }
-
-  Future<String> getFileData(String path) async {
-    return await rootBundle.loadString(path);
-  }
-
 }

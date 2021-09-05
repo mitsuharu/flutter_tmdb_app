@@ -2,6 +2,19 @@
 
 A new Flutter application for TMDb API
 
+
+## Devlopment
+
+### iOS
+
+```
+% open -a Simulator
+% flutter run 
+```
+
+
+
+
 # TODO
 
 ## ホーム画面
