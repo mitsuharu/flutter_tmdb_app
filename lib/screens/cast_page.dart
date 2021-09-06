@@ -51,7 +51,7 @@ class _CastPageState extends State<CastPage> {
         lastRequestedAt = DateTime.now();
       }
 
-      MoviesResponse res = await api.requestMoviesForMainPage(cast.personId, page);
+      MoviesResponse res = await api.requestMoviesWithCast(cast.personId, page);
       this.hasNextPage = res.page.hasNext();
       if (res.movies.length > 0) {
         setState(() {

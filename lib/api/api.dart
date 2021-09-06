@@ -1,85 +1,82 @@
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:io';
+import 'package:flutter_tmdb_app/api/error.dart';
 import 'package:http/http.dart' as http;
-
 import 'tmdb/tmdb_api.dart';
 import 'tmdb/movies_response.dart';
-
-import 'tmdb/cast.dart';
-import 'tmdb/movie.dart';
 import 'tmdb/movie_detail.dart';
-import 'tmdb/page.dart';
-
-/*
-
-http | Dart Package
-https://pub.dev/packages/http
-
-get - How do you add query parameters to a Dart http request? - Stack Overflow
-https://stackoverflow.com/questions/ask
-
-【初心者】Flutter:APIでデータ取得して、一覧表示させるサンプルアプリ - Qiita
-https://qiita.com/yasutaka_ono/items/6d2a0d3b0856598f9788
-
-
-*/
-
 
 class Api{
 
   bool isRequesting = false;
 
+  /// 共通リクエスト
+  Future<String> _requestGet(Uri uri) async {
+    try {
+      http.Response response = await http.get(uri);
+      confirmError(response);
+      return response.body.toString();
+    } on SocketException {
+      throw NetworkError();
+    } on TimeoutException{
+      throw TimeoutError();
+    } catch (e) {
+      throw e;
+    } finally {
+    }
+  }
+
   /// 最近の動画一覧を取得する
   Future<MoviesResponse> requestMovies(int page) async{
-    this.isRequesting = true;
-
-    var uri = TmdbApi.uriDiscoverMovies(page);
-    http.Response response = await http.get(uri);
-
-    var res = MoviesResponse.fromJson(response.body);
-
-    this.isRequesting = false;
-    return res;
+    try {
+      this.isRequesting = true;
+      var uri = TmdbApi.uriDiscoverMovies(page);
+      var res = await _requestGet(uri);
+      return MoviesResponse.fromJson(res);
+    } catch(e){
+      print("Api#requestMovies $e");
+      throw e;
+    } finally{
+      this.isRequesting = false;
+    }
   }
 
 
   /// 動画詳細を取得する
   Future<MovieDetail> requestMovieDetail(int movieId) async{
-    this.isRequesting = true;
+    try {
+      this.isRequesting = true;
 
-    // movie
-    var movieUri = TmdbApi.uriMovieDetail(movieId);
-    http.Response movieResponse = await http.get(movieUri);
+      // movie
+      var movieUri = TmdbApi.uriMovieDetail(movieId);
+      var movieResponse = await _requestGet(movieUri);
 
-    // cast
-    var castUri = TmdbApi.uriMovieCasts(movieId);
-    http.Response castResponse = await http.get(castUri);
+      // cast
+      var castUri = TmdbApi.uriMovieCasts(movieId);
+      var castResponse = await _requestGet(castUri);
 
-    MovieDetail res = MovieDetail.fromJson(movieResponse.body, castResponse.body);
-
-    this.isRequesting = false;
-    return res;
+      return MovieDetail.fromJson(movieResponse, castResponse);
+    }catch(e){
+      print("Api#requestMovieDetail $e");
+      throw e;
+    } finally{
+      this.isRequesting = false;
+    }
   }
 
   /// キャストから映画一覧を取得する
   Future<MoviesResponse> requestMoviesWithCast(int personId, int page) async{
-    this.isRequesting = true;
-
-    var uri = TmdbApi.uriDiscoverMoviesWithCast(personId, page);
-    http.Response response = await http.get(uri);
-
-    var res = MoviesResponse.fromJson(response.body);
-
-    this.isRequesting = false;
-    return res;
-  }
-
-  Future<MoviesResponse> requestMoviesForMainPage(int? personId, int page) async{
-    if (personId == null){
-      return requestMovies(page);
-    }else{
-      return requestMoviesWithCast(personId, page);
+    try {
+      this.isRequesting = true;
+      var uri = TmdbApi.uriDiscoverMoviesWithCast(personId, page);
+      var res = await _requestGet(uri);
+      return MoviesResponse.fromJson(res);
+    }catch(e){
+      print("Api#requestMoviesWithCast $e");
+      throw e;
+    } finally{
+      this.isRequesting = false;
     }
   }
 }
