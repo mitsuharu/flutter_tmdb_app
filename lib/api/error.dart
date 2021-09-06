@@ -44,7 +44,6 @@ class UnknownError extends CustomError {
 }
 
 void confirmError(http.Response response) {
-  print("confirmError statusCode: ${response.statusCode}");
   switch (response.statusCode) {
     case 200:
       break;

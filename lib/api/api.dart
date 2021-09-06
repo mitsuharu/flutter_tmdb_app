@@ -7,9 +7,20 @@ import 'tmdb/tmdb_api.dart';
 import 'tmdb/movies_response.dart';
 import 'tmdb/movie_detail.dart';
 
+
+enum RequestStatus{
+  initial,
+  loading,
+  success,
+  failed,
+  empty,
+}
+
 class Api{
 
-  bool isRequesting = false;
+  bool hasNext = false;
+  RequestStatus requestStatus = RequestStatus.initial;
+  DateTime? lastRequestedAt;
 
   /// 共通リクエスト
   Future<String> _requestGet(Uri uri) async {
@@ -30,15 +41,20 @@ class Api{
   /// 最近の動画一覧を取得する
   Future<MoviesResponse> requestMovies(int page) async{
     try {
-      this.isRequesting = true;
+      requestStatus = RequestStatus.loading;
+
       var uri = TmdbApi.uriDiscoverMovies(page);
       var res = await _requestGet(uri);
-      return MoviesResponse.fromJson(res);
+      var result = MoviesResponse.fromJson(res);
+
+      hasNext = result.page.hasNext();
+      requestStatus = RequestStatus.success;
+      lastRequestedAt = DateTime.now();
+      return result;
     } catch(e){
       print("Api#requestMovies $e");
+      requestStatus = RequestStatus.failed;
       throw e;
-    } finally{
-      this.isRequesting = false;
     }
   }
 
@@ -46,7 +62,7 @@ class Api{
   /// 動画詳細を取得する
   Future<MovieDetail> requestMovieDetail(int movieId) async{
     try {
-      this.isRequesting = true;
+      requestStatus = RequestStatus.loading;
 
       // movie
       var movieUri = TmdbApi.uriMovieDetail(movieId);
@@ -56,27 +72,35 @@ class Api{
       var castUri = TmdbApi.uriMovieCasts(movieId);
       var castResponse = await _requestGet(castUri);
 
-      return MovieDetail.fromJson(movieResponse, castResponse);
+      var result = MovieDetail.fromJson(movieResponse, castResponse);
+
+      requestStatus = RequestStatus.success;
+      lastRequestedAt = DateTime.now();
+      return result;
     }catch(e){
       print("Api#requestMovieDetail $e");
+      requestStatus = RequestStatus.failed;
       throw e;
-    } finally{
-      this.isRequesting = false;
     }
   }
 
   /// キャストから映画一覧を取得する
   Future<MoviesResponse> requestMoviesWithCast(int personId, int page) async{
     try {
-      this.isRequesting = true;
+      requestStatus = RequestStatus.loading;
+
       var uri = TmdbApi.uriDiscoverMoviesWithCast(personId, page);
       var res = await _requestGet(uri);
-      return MoviesResponse.fromJson(res);
+      var result = MoviesResponse.fromJson(res);
+
+      hasNext = result.page.hasNext();
+      requestStatus = RequestStatus.success;
+      lastRequestedAt = DateTime.now();
+      return result;
     }catch(e){
       print("Api#requestMoviesWithCast $e");
+      requestStatus = RequestStatus.failed;
       throw e;
-    } finally{
-      this.isRequesting = false;
     }
   }
 }
