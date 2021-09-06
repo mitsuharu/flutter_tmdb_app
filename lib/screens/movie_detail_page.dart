@@ -52,12 +52,14 @@ class _MovieDetailState extends State<MovieDetailPage> {
         requestStatus = RequestStatus.success;
       });
     }catch(e){
-      print("MovieDetailPage#request $e");
+      print("MovieDetailPage#_requestMovieDetail $e");
       setState(() {
         requestStatus = RequestStatus.failed;
       });
       if (e is NetworkError){
         Fluttertoast.showToast(msg: Constant.error.networkFailed);
+      }else{
+        Fluttertoast.showToast(msg: Constant.error.unknown);
       }
     }
   }
