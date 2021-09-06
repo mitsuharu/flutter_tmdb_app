@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/api/error.dart';
 import 'package:flutter_tmdb_app/api/tmdb/cast.dart';
+import 'package:flutter_tmdb_app/constants.dart';
+import 'package:flutter_tmdb_app/screens/widgets/empty_view.dart';
 import 'package:flutter_tmdb_app/screens/widgets/movie_list.dart';
 import 'package:flutter_tmdb_app/screens/movie_detail_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../api/api.dart';
 import '../api/tmdb/movies_response.dart';
 import '../api/tmdb/movie.dart';
 
-/// 前後数か月公開の映画の一覧です
+/// キャスト指定の前後数か月公開の映画の一覧です
 class CastPage extends StatefulWidget {
 
   final Cast cast;
@@ -15,21 +19,16 @@ class CastPage extends StatefulWidget {
   CastPage({Key? key, required this.cast}) : super(key: key);
 
   @override
-  _CastPageState createState() => _CastPageState(cast);
+  _CastPageState createState() => _CastPageState();
 }
 
 class _CastPageState extends State<CastPage> {
 
-  Cast cast = Cast();
-
   Api api = Api();
   int page = 1;
-  bool hasNextPage = false;
+  RequestStatus requestStatus = RequestStatus.initial;
+  bool hasNext = true;
   List<Movie> movies = <Movie>[];
-  DateTime? lastRequestedAt;
-
-  /// コンストラクタ
-  _CastPageState(this.cast);
 
   @override
   void initState() {
@@ -42,64 +41,53 @@ class _CastPageState extends State<CastPage> {
     super.dispose();
   }
 
-
-  Future<int> requestAPIs(int page) async{
+  Future<void> requestAPIs(int page) async{
     try {
-      print("requestAPIs page: $page");
-
-      if (page == 1 || lastRequestedAt == null) {
-        lastRequestedAt = DateTime.now();
-      }
-
-      MoviesResponse res = await api.requestMoviesForMainPage(cast.personId, page);
-      this.hasNextPage = res.page.hasNext();
-      if (res.movies.length > 0) {
-        setState(() {
-          this.movies.addAll(res.movies);
-        });
-      }
-      return page;
+      setState(() {
+        requestStatus = RequestStatus.loading;
+      });
+      MoviesResponse res = await api.requestMoviesWithCast(widget.cast.personId, page);
+      var nextMovies = movies + res.movies;
+      setState(() {
+        movies = nextMovies;
+        requestStatus = nextMovies.length == 0 ? RequestStatus.empty : RequestStatus.success;
+        hasNext = api.hasNext;
+      });
     }catch(e){
-      return page;
+      print("CastPage#requestAPIs $e, ${api.requestStatus}");
+      setState(() {
+        requestStatus =  movies.length == 0 ? RequestStatus.empty : RequestStatus.failed;
+      });
+      if (e is NetworkError){
+        Fluttertoast.showToast(msg: Constant.error.networkFailed);
+      }else{
+        Fluttertoast.showToast(msg: Constant.error.unknown);
+      }
     }
   }
 
   Future<void> _onRefresh() async{
     try {
-      final Completer<void> completer = Completer<void>();
-
-      final diff = lastRequestedAt != null ? DateTime
-          .now()
-          .difference(lastRequestedAt!)
-          .inHours : 0;
-      print("diff $diff");
-
-      if (diff < 1) {
-        Timer(const Duration(seconds: 2), () {
-          completer.complete();
-        });
-      } else {
-        this.page = 1;
-        setState(() {
-          this.movies = <Movie>[];
-        });
-        await requestAPIs(this.page);
-        completer.complete();
-      }
-      return completer.future.then<void>((_) {});
+      this.page = 1;
+      setState(() {
+        this.movies = <Movie>[];
+        requestStatus = RequestStatus.initial;
+        hasNext = true;
+      });
+      await requestAPIs(this.page);
     }catch(e){
-      print("MainPage#_onRefresh $e");
+      print("CastPage#_onRefresh $e");
     }
   }
 
   Future<void> _onEndReached() async{
     try{
-      if (api.isRequesting == false && this.hasNextPage == true) {
+      if (requestStatus != RequestStatus.loading && hasNext == true) {
         this.page += 1;
         requestAPIs(this.page);
       }
     }catch(e){
-      print("MainPage#_onEndReached $e");
+      print("CastPage#_onEndReached $e");
     }
   }
 
@@ -111,7 +99,7 @@ class _CastPageState extends State<CastPage> {
         MaterialPageRoute(builder: (context) => page),
       );
     }catch(e){
-      print("MainPage#_onPress $e");
+      print("CastPage#_onPress $e");
     }
   }
 
@@ -119,16 +107,17 @@ class _CastPageState extends State<CastPage> {
   Widget build(BuildContext context) {
 
     var appBar = AppBar(
-      title: Text(cast.name),
+      title: Text(widget.cast.name),
       actions: [],
     );
 
     return Scaffold(
         appBar: appBar,
-        body: MovieList(
-          movies: movies,
-          isLoading: this.api.isRequesting,
-          hasNext: this.hasNextPage,
+        body: requestStatus == RequestStatus.empty
+            ? EmptyView(onPress: _onRefresh)
+            : MovieList(movies: movies,
+          isLoading: api.requestStatus == RequestStatus.loading,
+          hasNext: api.hasNext,
           onRefresh: _onRefresh,
           onEndReached: _onEndReached,
           onPress: _onPress,

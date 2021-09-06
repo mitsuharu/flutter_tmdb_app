@@ -21,21 +21,18 @@ class MovieItem extends StatefulWidget {
   MovieItem({required this.movie, required this.onTapCell});
 
   @override
-  _MovieItemState createState() => _MovieItemState(movie, onTapCell);
+  _MovieItemState createState() => _MovieItemState();
 }
 
 class _MovieItemState extends State<MovieItem> {
-  Movie movie;
-  VoidCallback onTapCell;
 
-  _MovieItemState(this.movie, this.onTapCell);
 
   /// カレンダーに登録する
   Future<void> _registerToCalendar() async {
     try {
       var result = await UtilCalendar.addToCalendar(
-          movie.title,
-          movie.releaseDate!);
+          widget.movie.title,
+          widget.movie.releaseDate!);
       var str = result
           ? Constant.cal.successMessage
           : Constant.cal.errorMessage;
@@ -49,7 +46,7 @@ class _MovieItemState extends State<MovieItem> {
   @override
   Widget build(BuildContext context) {
 
-    var imageUrl = this.movie.posterUrl(PosterSize.normal);
+    var imageUrl = widget.movie.posterUrl(PosterSize.normal);
     const double cartHeight = 115.0;
     const double padding = 16.0;
     const double imageHeight = cartHeight - padding;
@@ -65,7 +62,7 @@ class _MovieItemState extends State<MovieItem> {
 
     return InkWell(
       onTap: () {
-        onTapCell();
+        widget.onTapCell();
       },
       child: Padding(
         padding: const EdgeInsets.all(padding),

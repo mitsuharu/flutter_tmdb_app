@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/api/error.dart';
+import 'package:flutter_tmdb_app/screens/widgets/empty_view.dart';
 import 'package:flutter_tmdb_app/screens/widgets/movie_list.dart';
 import 'package:flutter_tmdb_app/screens/movie_detail_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
 import '../api/api.dart';
 import '../api/tmdb/movies_response.dart';
 import './info_page.dart';
 import '../api/tmdb/movie.dart';
 
-/// 前後数か月公開の映画の一覧です
+/// メイン（前後数か月公開の映画の一覧）です
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
 
@@ -20,12 +23,9 @@ class _MainPageState extends State<MainPage> {
 
   Api api = Api();
   int page = 1;
-  bool hasNextPage = false;
+  RequestStatus requestStatus = RequestStatus.initial;
+  bool hasNext = true;
   List<Movie> movies = <Movie>[];
-  DateTime? lastRequestedAt;
-
-  /// コンストラクタ
-  _MainPageState();
 
   @override
   void initState() {
@@ -38,50 +38,40 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  Future<int> requestAPIs(int page) async{
+  Future<void> requestAPIs(int page) async{
     try {
-      print("requestAPIs page: $page");
+      setState(() {
+        requestStatus = RequestStatus.loading;
+      });
+      MoviesResponse res = await api.requestMovies(page);
+      var nextMovies = movies + res.movies;
 
-      if (page == 1 || lastRequestedAt == null) {
-        lastRequestedAt = DateTime.now();
-      }
-
-      MoviesResponse res = await api.requestMoviesForMainPage(null, page);
-      this.hasNextPage = res.page.hasNext();
-      if (res.movies.length > 0) {
-        setState(() {
-          this.movies.addAll(res.movies);
-        });
-      }
-      return page;
+      setState(() {
+        movies = nextMovies;
+        requestStatus = nextMovies.length == 0 ? RequestStatus.empty : RequestStatus.success;
+        hasNext = api.hasNext;
+      });
     }catch(e){
-      return page;
+      setState(() {
+        requestStatus =  movies.length == 0 ? RequestStatus.empty : RequestStatus.failed;
+      });
+      if (e is NetworkError){
+        Fluttertoast.showToast(msg: Constant.error.networkFailed);
+      }else{
+        Fluttertoast.showToast(msg: Constant.error.unknown);
+      }
     }
   }
 
   Future<void> _onRefresh() async{
     try {
-      final Completer<void> completer = Completer<void>();
-
-      final diff = lastRequestedAt != null ? DateTime
-          .now()
-          .difference(lastRequestedAt!)
-          .inHours : 0;
-      print("diff $diff");
-
-      if (diff < 1) {
-        Timer(const Duration(seconds: 2), () {
-          completer.complete();
-        });
-      } else {
-        this.page = 1;
-        setState(() {
-          this.movies = <Movie>[];
-        });
-        await requestAPIs(this.page);
-        completer.complete();
-      }
-      return completer.future.then<void>((_) {});
+      this.page = 1;
+      setState(() {
+        this.movies = <Movie>[];
+        requestStatus = RequestStatus.initial;
+        hasNext = true;
+      });
+      await requestAPIs(this.page);
     }catch(e){
       print("MainPage#_onRefresh $e");
     }
@@ -89,7 +79,7 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _onEndReached() async{
     try{
-      if (api.isRequesting == false && this.hasNextPage == true) {
+      if (requestStatus != RequestStatus.loading && hasNext == true) {
         this.page += 1;
         requestAPIs(this.page);
       }
@@ -128,14 +118,17 @@ class _MainPageState extends State<MainPage> {
 
     return Scaffold(
       appBar: appBar,
-      body: MovieList(
-          movies: movies,
-          isLoading: this.api.isRequesting,
-          hasNext: this.hasNextPage,
-          onRefresh: _onRefresh,
-          onEndReached: _onEndReached,
-          onPress: _onPress,
-      )
+      body: requestStatus == RequestStatus.empty
+          ? EmptyView(onPress: (){
+            _onRefresh();
+          })
+          : MovieList(movies: movies,
+            isLoading: requestStatus == RequestStatus.loading,
+            hasNext: hasNext,
+            onRefresh: _onRefresh,
+            onEndReached: _onEndReached,
+            onPress: _onPress,
+          )
     );
   }
 }
