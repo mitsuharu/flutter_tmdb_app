@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/api/error.dart';
 import 'package:flutter_tmdb_app/screens/widgets/movie_list.dart';
 import 'package:flutter_tmdb_app/screens/movie_detail_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../constants.dart';
 import '../api/api.dart';
 import '../api/tmdb/movies_response.dart';
@@ -40,14 +42,12 @@ class _MainPageState extends State<MainPage> {
 
   Future<int> requestAPIs(int page) async{
     try {
-      print("requestAPIs page: $page");
+      MoviesResponse res = await api.requestMovies(page);
+      this.hasNextPage = res.page.hasNext();
 
       if (page == 1 || lastRequestedAt == null) {
         lastRequestedAt = DateTime.now();
       }
-
-      MoviesResponse res = await api.requestMoviesForMainPage(null, page);
-      this.hasNextPage = res.page.hasNext();
       if (res.movies.length > 0) {
         setState(() {
           this.movies.addAll(res.movies);
@@ -55,6 +55,10 @@ class _MainPageState extends State<MainPage> {
       }
       return page;
     }catch(e){
+      print("MainPage#requestAPIs page: $page, error:$e");
+      if (e is NetworkError){
+        Fluttertoast.showToast(msg: Constant.error.networkFailed);
+      }
       return page;
     }
   }
