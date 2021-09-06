@@ -17,11 +17,11 @@ class _EmptyViewState extends State<EmptyView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(32),
       child: Column(
         // mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.sentiment_dissatisfied_rounded ,
+          Icon(Icons.sentiment_dissatisfied_rounded,
             color: Colors.grey,
             size: 128.0),
           Center(
@@ -34,9 +34,7 @@ class _EmptyViewState extends State<EmptyView> {
               color: Colors.white,
             ),
             label: const Text('更新する'),
-            onPressed: () {
-              widget.onPress();
-              },
+            onPressed: widget.onPress,
           ),
         ],
       ),
