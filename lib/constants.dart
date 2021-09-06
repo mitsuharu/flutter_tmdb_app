@@ -24,6 +24,7 @@ class Cal{
 class Error{
   final String networkFailed = "ネットワークに接続できませんでした。ネットワーク設定の確認、または時間をおいて再度お試しください。";
   final String unknown = "失敗しました。ネットワーク設定の確認、または時間をおいて再度お試しください。";
+  final String share = "シェアに失敗しました。";
 }
 
 class Info{

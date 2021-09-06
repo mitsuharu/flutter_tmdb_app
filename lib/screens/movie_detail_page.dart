@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tmdb_app/api/error.dart';
 import 'package:flutter_tmdb_app/screens/cast_page.dart';
+import 'package:flutter_tmdb_app/screens/widgets/empty_view.dart';
 import 'package:flutter_tmdb_app/util/calendar.dart';
 import '../constants.dart';
 import '../api/api.dart';
 import '../api/tmdb/movie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import '../api/tmdb/util.dart';
 import '../api/tmdb/cast.dart';
 import '../api/tmdb/movie_detail.dart';
-
 
 /// 動画詳細ページ
 class MovieDetailPage extends StatefulWidget {
@@ -27,20 +28,67 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
   MovieDetail? movieDetail;
   Api api = Api();
+  RequestStatus requestStatus = RequestStatus.initial;
 
   @override
   void initState() {
     super.initState();
-    api.requestMovieDetail(widget.movie.movieId).then((res){
-      setState(() {
-        this.movieDetail = res;
-      });
-    });
+    _requestMovieDetail();
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> _requestMovieDetail() async{
+    try{
+      setState(() {
+        requestStatus = RequestStatus.loading;
+      });
+      var res = await api.requestMovieDetail(widget.movie.movieId);
+      setState(() {
+        movieDetail = res;
+        requestStatus = RequestStatus.success;
+      });
+    }catch(e){
+      print("MovieDetailPage#request $e");
+      setState(() {
+        requestStatus = RequestStatus.failed;
+      });
+      if (e is NetworkError){
+        Fluttertoast.showToast(msg: Constant.error.networkFailed);
+      }
+    }
+  }
+
+  void _addToCalendar() async{
+    try {
+      var result = await UtilCalendar.addToCalendar(
+          movieDetail!.movie.title,
+          movieDetail!.movie.releaseDate!);
+      var str = result
+          ? Constant.cal.successMessage
+          : Constant.cal.errorMessage;
+      Fluttertoast.showToast(msg: str);
+    }catch(e){
+      print("MovieDetailPage#_addToCalendar $e");
+      Fluttertoast.showToast(msg: Constant.cal.errorMessage);
+    }
+  }
+
+  void _shareMovie(){
+    try {
+      var text = movieDetail!.movie.title;
+      if (movieDetail!.movie.homepage != null &&
+          movieDetail!.movie.homepage!.length > 0) {
+        text += " ${movieDetail!.movie.homepage}";
+      }
+      Share.share(text);
+    }catch(e){
+      print("MovieDetailPage#_shareMovie $e");
+      Fluttertoast.showToast(msg: Constant.error.share);
+    }
   }
 
   @override
@@ -49,50 +97,30 @@ class _MovieDetailState extends State<MovieDetailPage> {
   }
 
   Scaffold scaffoldWidget(){
-    if (movieDetail == null){
-      return Scaffold(
-        appBar: AppBar(),
-        body: Center(
-            child: CircularProgressIndicator(),
-        ),
-      );
-    }else{
+
+    if (requestStatus == RequestStatus.success && movieDetail != null) {
       return Scaffold(
         body: bodyWidget(),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.event),
-            onPressed: (){
-              _addToCalendar();
-            }),
+            onPressed: _addToCalendar),
       );
     }
-  }
-
-  void _addToCalendar() async{
-    if (movieDetail != null) {
-      var result = await UtilCalendar.addToCalendar(
-          movieDetail!.movie.title,
-          movieDetail!.movie.releaseDate!);
-      var str = result
-          ? Constant.cal.successMessage
-          : Constant.cal.errorMessage;
-      Fluttertoast.showToast(msg: str);
-    }else{
-      Fluttertoast.showToast(msg: Constant.cal.errorMessage);
+    if (requestStatus == RequestStatus.failed){
+      return Scaffold(
+        appBar: AppBar(),
+        body: EmptyView(onPress: _requestMovieDetail)
+      );
     }
-  }
 
-  void _shareMovie(){
-    if (movieDetail != null) {
-      var text = movieDetail!.movie.title;
-      if (movieDetail!.movie.homepage != null &&
-          movieDetail!.movie.homepage!.length > 0) {
-        text += " ${movieDetail!.movie.homepage}";
-      }
-      Share.share(text);
-    }
-  }
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
 
+  }
 
   Widget bodyWidget(){
     return contentSliverListView();
@@ -110,9 +138,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.share),
-            onPressed: (){
-              _shareMovie();
-            },
+            onPressed: _shareMovie,
           ),
         ],
       ),
@@ -162,18 +188,15 @@ class _MovieDetailState extends State<MovieDetailPage> {
 
     items.add(tmdbCell());
 
-
     return items;
   }
 
-  Widget contentsListView(){
-
-    var listView = ListView(
-      children: contentsItems(),
-    );
-    return listView;
-  }
-
+  // Widget contentsListView(){
+  //   var listView = ListView(
+  //     children: contentsItems(),
+  //   );
+  //   return listView;
+  // }
 
   Widget titleCell(string){
     return Padding(
@@ -187,9 +210,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
     );
   }
 
-
   Widget paddingCell(String string){
-
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
@@ -252,9 +273,7 @@ class _MovieDetailState extends State<MovieDetailPage> {
     );
   }
 
-
   Widget castCell(Cast cast){
-
     var imageUrl = cast.profileUrl(PosterSize.normal);
     Widget imageWidget = Image.asset('lib/images/no_poster_image.png');
     if (imageUrl != null && imageUrl.length > 0){
@@ -302,11 +321,9 @@ class _MovieDetailState extends State<MovieDetailPage> {
           });
         },
         child: cell);
-
   }
 
   Widget tmdbCell(){
-
     var btn = TextButton(
           onPressed: (){
             var url = movieDetail!.movie.tmdbUrl();
