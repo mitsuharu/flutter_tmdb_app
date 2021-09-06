@@ -7,15 +7,12 @@ class EmptyView extends StatefulWidget {
   EmptyView({required this.onPress});
 
   @override
-  _EmptyViewState createState() => _EmptyViewState(onPress);
+  _EmptyViewState createState() => _EmptyViewState();
 }
 
 class _EmptyViewState extends State<EmptyView> {
 
   final message = "見つかりませんでした";
-  VoidCallback onPress;
-
-  _EmptyViewState(this.onPress);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +35,7 @@ class _EmptyViewState extends State<EmptyView> {
             ),
             label: const Text('更新する'),
             onPressed: () {
-              this.onPress();
+              widget.onPress();
               },
           ),
         ],
