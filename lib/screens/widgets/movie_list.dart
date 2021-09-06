@@ -24,37 +24,13 @@ class MovieList extends StatefulWidget {
   });
 
   @override
-  _MovieListState createState() => _MovieListState(
-      movies,
-      isLoading,
-      hasNext,
-      onRefresh,
-      onEndReached,
-      onPress,
-  );
+  _MovieListState createState() => _MovieListState();
 }
 
 class _MovieListState extends State<MovieList> {
 
-  List<Movie> movies = <Movie>[];
-  bool isLoading = false;
-  bool hasNext = false;
-  AsyncCallback onRefresh =  (() async {});
-  AsyncCallback onEndReached =  (() async {});
-  ValueSetter<Movie> onPress =  ((_) {});
-
   // スクロール検知
   ScrollController _scrollController = ScrollController();
-
-  /// コンストラクタ
-  _MovieListState(
-      this.movies,
-      this.isLoading,
-      this.hasNext,
-      this.onRefresh,
-      this.onEndReached,
-      this.onPress,
-      );
 
   @override
   void initState() {
@@ -74,13 +50,13 @@ class _MovieListState extends State<MovieList> {
         _scrollController.offset / _scrollController.position.maxScrollExtent;
     const threshold = 0.8;
     if (positionRate > threshold) {
-      onEndReached();
+      widget.onEndReached();
     }
   }
 
   Widget movieListWidget(){
-
-    if (isLoading && movies.length == 0){
+    
+    if (widget.isLoading && widget.movies.length == 0){
       return Center(
         child: CircularProgressIndicator(), // Text(Constant.commons.notFound),
       );
@@ -88,12 +64,12 @@ class _MovieListState extends State<MovieList> {
 
     var listView = ListView.builder(
       controller: _scrollController,
-      itemCount: movies.length + (hasNext == true ? 1 : 0),
+      itemCount: widget.movies.length + (widget.hasNext == true ? 1 : 0),
       itemBuilder: (BuildContext context, int index) {
 
         var title = Constant.commons.nowLoading;
-        if (index < this.movies.length){
-          Movie movie = movies[index];
+        if (index < widget.movies.length){
+          Movie movie = widget.movies[index];
           title = movie.title;
 
           return Container(
@@ -105,7 +81,7 @@ class _MovieListState extends State<MovieList> {
               child: MovieItem(
                 movie: movie,
                 onTapCell: (){
-                  this.onPress(movie);
+                  widget.onPress(movie);
                 },
               ),
           );
@@ -125,7 +101,7 @@ class _MovieListState extends State<MovieList> {
 
     return RefreshIndicator(
         onRefresh: () async {
-          onRefresh();
+          widget.onRefresh();
         },
         child: listView);
   }
