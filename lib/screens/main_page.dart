@@ -57,6 +57,8 @@ class _MainPageState extends State<MainPage> {
       });
       if (e is NetworkError){
         Fluttertoast.showToast(msg: Constant.error.networkFailed);
+      }else{
+        Fluttertoast.showToast(msg: Constant.error.unknown);
       }
     }
   }
