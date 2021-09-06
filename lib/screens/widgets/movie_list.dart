@@ -55,9 +55,7 @@ class _MovieListState extends State<MovieList> {
   }
 
   Widget movieListWidget(){
-
-    print("movieListWidget isLoading: ${widget.isLoading}, movies.length: ${widget.movies.length}");
-
+    
     if (widget.isLoading && widget.movies.length == 0){
       return Center(
         child: CircularProgressIndicator(), // Text(Constant.commons.notFound),
