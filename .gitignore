@@ -4,10 +4,7 @@ key.jks
 key.properties
 
 # API
-lib/models/api_key.dart
-#class ApiConstants{
-#  static final String apiKey = "aaa";
-#}
+lib/api/tmdb/api_key.dart
 
 # Miscellaneous
 *.class
