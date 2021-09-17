@@ -1,37 +1,21 @@
-# flutter_tmdb_app
+# flutter tmdb app
 
-A new Flutter application for TMDb API
+A Flutter application for TMDb API
 
 
 ## Devlopment
 
-### iOS
+### Api Key
 
+
+You need to get Api key, then make `api_key.dart` at `lib/api/tmdb/api_key.dart`
+
+- [My API Settings — The Movie Database (TMDB)](https://www.themoviedb.org/settings/api)
+
+
+```dart
+/// lib/api/tmdb/api_key.dart
+class ApiConstants{
+  static const String apiKey = "your_api_key";
+}
 ```
-% open -a Simulator
-% flutter run 
-```
-
-
-
-
-# TODO
-
-## ホーム画面
-
-- セルのデザイン
-
-
-## 詳細画面
-
-
-- 人気とか指標があれば
-
-
-## 設定画面
-
-- 設定？や謝辞，ライセンス画面を作る
-
-## その他
-
-- リクエストのキャッシュをする
