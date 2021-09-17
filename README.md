@@ -2,9 +2,12 @@
 
 This is a Flutter application with TMDb API.
 
+- get recently shown movies
+- add released day at your calendar
 
-<img src="./screenshots/sh-1.png" />
-<img src="./screenshots/sh-2.png" />
+| home (list) | detail |
+|:-:|:-:|
+|<img src="./screenshots/sh-1.png" />|<img src="./screenshots/sh-2.png" />|
 
 This App is released as follows.
 
